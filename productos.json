@@ -32,13 +32,13 @@
     },
     {
       "id": 1772673312342,
-      "name": "test",
+      "name": "Grafica Asus RTX 4060 ROG Strix",
       "cat": "Informática",
-      "desc": "test",
-      "price": "6.900.000Gs.",
+      "desc": "Tarjeta gráfica para juegos (PCIe 4.0, 8GB GDDR6, DLSS 3, HDMI 2.1a, DisplayPort 1.4a, diseño de ventilador Axial-tech, Aura Sync, tecnología 0dB)",
+      "price": "6.900.000 Gs.",
       "badge": "Nuevo",
       "img": "https://res.cloudinary.com/drzu2lb6c/image/upload/v1772673305/poweronepy/hqcqbiytpy4lfumfxuo7.jpg",
-      "discount": ""
+      "discount": "5"
     }
   ],
   "categories": [
