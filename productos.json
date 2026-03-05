@@ -17,7 +17,8 @@
       "desc": "Teclado mecánico con switches azules y retroiluminación RGB.",
       "price": "280.000 Gs.",
       "badge": "Hot",
-      "img": ""
+      "img": "https://res.cloudinary.com/drzu2lb6c/image/upload/v1772674775/poweronepy/bjmupfs3tdm4bjj5w3ly.jpg",
+      "discount": ""
     },
     {
       "id": 3,
@@ -26,7 +27,7 @@
       "desc": "Pantalla táctil, Android Auto, WiFi y GPS.",
       "price": "450.000 Gs.",
       "badge": "Oferta",
-      "img": "",
+      "img": "https://res.cloudinary.com/drzu2lb6c/image/upload/v1772674783/poweronepy/hvsng8dxwnosjrjtry6k.jpg",
       "discount": ""
     },
     {
