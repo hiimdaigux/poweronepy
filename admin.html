@@ -6,39 +6,26 @@
 <title>Admin — Power One Py</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root {
-  --y:#FFD600; --yd:#F0C200; --b:#0A0A0A; --bm:#1A1A1A; --bs:#242424; --w:#FFFFFF;
-}
+:root{--y:#FFD600;--b:#0A0A0A;--bm:#1A1A1A;--bs:#242424;--w:#FFFFFF}
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
 body{font-family:'Barlow',sans-serif;background:var(--b);color:var(--w);min-height:100vh}
-::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-thumb{background:var(--y)}
-
-/* LOGIN */
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--y)}
 #loginScreen{position:fixed;inset:0;background:var(--b);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px}
-.login-box{background:var(--bm);border:1px solid rgba(255,214,0,.2);padding:3rem;width:100%;max-width:420px;animation:scaleIn .3s ease}
+.login-box{background:var(--bm);border:1px solid rgba(255,214,0,.2);padding:3rem;width:100%;max-width:420px}
 .login-logo{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--w);letter-spacing:.08em;margin-bottom:.2rem}
 .login-logo span{color:var(--y)}
 .login-sub{font-size:.88rem;color:rgba(255,255,255,.35);margin-bottom:2rem}
-.form-label{display:block;font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:600;color:var(--y);text-transform:uppercase;letter-spacing:.15em;margin-bottom:.45rem}
-.form-input{width:100%;background:var(--bs);border:1px solid rgba(255,255,255,.1);color:var(--w);font-family:'Barlow',sans-serif;font-size:.92rem;padding:11px 13px;outline:none;transition:border .2s;margin-bottom:1rem}
-.form-input:focus{border-color:var(--y)}
-.form-error{color:#ff5252;font-size:.8rem;margin-top:-.5rem;margin-bottom:.8rem;min-height:1rem}
-select.form-input option{background:var(--bm)}
-textarea.form-input{resize:vertical}
+.fl{display:block;font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:600;color:var(--y);text-transform:uppercase;letter-spacing:.15em;margin-bottom:.45rem}
+.fi{width:100%;background:var(--bs);border:1px solid rgba(255,255,255,.1);color:var(--w);font-family:'Barlow',sans-serif;font-size:.92rem;padding:11px 13px;outline:none;transition:border .2s;margin-bottom:1rem}
+.fi:focus{border-color:var(--y)}select.fi option{background:var(--bm)}textarea.fi{resize:vertical}
+.ferr{color:#ff5252;font-size:.8rem;margin-top:-.5rem;margin-bottom:.8rem;min-height:1rem}
 .btn-y{background:var(--y);color:var(--b);border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;letter-spacing:.1em;text-transform:uppercase;padding:13px 28px;display:inline-flex;align-items:center;gap:8px;transition:all .25s;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
-.btn-y:hover{background:var(--w);transform:translateY(-2px)}
-.btn-y:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-y:hover{background:var(--w);transform:translateY(-2px)}.btn-y:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .btn-full{width:100%;justify-content:center}
 .btn-ghost{background:none;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;padding:9px 18px;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
 .btn-ghost:hover{border-color:var(--y);color:var(--y)}
 .btn-sm{background:none;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.55);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding:5px 11px;transition:all .2s}
-.btn-sm:hover{border-color:var(--y);color:var(--y)}
-.btn-sm.del:hover{border-color:#ff5252;color:#ff5252}
-.btn-sm.ok{border-color:#4caf50;color:#4caf50}
-
-/* LAYOUT */
+.btn-sm:hover{border-color:var(--y);color:var(--y)}.btn-sm.del:hover{border-color:#ff5252;color:#ff5252}
 #app{display:none;min-height:100vh}
 .sidebar{position:fixed;left:0;top:0;bottom:0;width:240px;background:var(--bm);border-right:1px solid rgba(255,214,0,.1);display:flex;flex-direction:column;z-index:100}
 .sidebar-logo{padding:1.5rem 1.5rem 1rem;border-bottom:1px solid rgba(255,214,0,.1)}
@@ -47,138 +34,81 @@ textarea.form-input{resize:vertical}
 .sidebar-logo-sub{font-size:.72rem;color:rgba(255,255,255,.3);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.15em}
 .sidebar-nav{flex:1;padding:1rem 0;overflow-y:auto}
 .nav-item{display:flex;align-items:center;gap:.9rem;padding:.85rem 1.5rem;cursor:pointer;color:rgba(255,255,255,.45);font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.9rem;text-transform:uppercase;letter-spacing:.08em;transition:all .2s;border-left:3px solid transparent}
-.nav-item:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.03)}
-.nav-item.active{color:var(--y);border-left-color:var(--y);background:rgba(255,214,0,.04)}
-.nav-item .ni{font-size:1.1rem;width:22px;text-align:center}
+.nav-item:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.03)}.nav-item.active{color:var(--y);border-left-color:var(--y);background:rgba(255,214,0,.04)}
+.ni{font-size:1.1rem;width:22px;text-align:center}
 .sidebar-footer{padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.05)}
-.sidebar-footer .status-dot{width:8px;height:8px;border-radius:50%;background:#4caf50;display:inline-block;margin-right:.5rem}
-.sidebar-footer .status-dot.off{background:#ff5252}
-.sidebar-footer p{font-size:.75rem;color:rgba(255,255,255,.3);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;margin-top:.5rem}
+.sdot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:.5rem}
 .main{margin-left:240px;min-height:100vh}
 .topbar{background:var(--bs);border-bottom:1px solid rgba(255,214,0,.1);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between}
 .topbar h1{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--w);letter-spacing:.05em}
-.topbar-actions{display:flex;gap:.8rem;align-items:center}
 .content{padding:2rem}
-
-/* CARDS */
 .stat-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-bottom:2rem}
 .scard{background:var(--bm);border:1px solid rgba(255,255,255,.05);padding:1.5rem;transition:border .2s}
 .scard:hover{border-color:rgba(255,214,0,.2)}
 .scard-num{font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:var(--y);line-height:1}
 .scard-label{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.1em;margin-top:.3rem}
-
-/* PANEL */
 .panel{background:var(--bm);border:1px solid rgba(255,255,255,.06);margin-bottom:1.5rem}
 .panel-head{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.05);background:var(--bs)}
 .panel-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--w);letter-spacing:.05em}
 .panel-body{padding:1.5rem}
-
-/* TABLE */
 .tbl{width:100%;border-collapse:collapse}
 .tbl th{background:rgba(0,0,0,.2);font-family:'Barlow Condensed',sans-serif;font-size:.77rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--y);padding:10px 14px;text-align:left;border-bottom:1px solid rgba(255,214,0,.12)}
 .tbl td{padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.03);font-size:.88rem;color:rgba(255,255,255,.75);vertical-align:middle}
 .tbl tr:hover td{background:rgba(255,255,255,.015)}
 .tbl img{width:48px;height:48px;object-fit:cover;border-radius:2px;border:1px solid rgba(255,255,255,.08)}
-.tbl .no-img-thumb{width:48px;height:48px;background:var(--bs);display:inline-flex;align-items:center;justify-content:center;font-size:1.3rem;border-radius:2px}
+.nothumb{width:48px;height:48px;background:var(--bs);display:inline-flex;align-items:center;justify-content:center;font-size:1.3rem;border-radius:2px}
 .td-actions{display:flex;gap:.4rem;flex-wrap:wrap}
-.badge-chip{display:inline-block;background:var(--y);color:var(--b);font-family:'Barlow Condensed',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:.1em;padding:2px 7px;text-transform:uppercase}
-
-/* FORM GRID */
-.fg{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-.fg .s2{grid-column:1/-1}
-.fg-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
-
-/* IMG UPLOAD */
+.chip{display:inline-block;background:var(--y);color:var(--b);font-family:'Barlow Condensed',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:.1em;padding:2px 7px;text-transform:uppercase}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.fg .s2{grid-column:1/-1}.fg-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
 .upload-zone{border:2px dashed rgba(255,214,0,.18);background:var(--bs);padding:2rem;text-align:center;cursor:pointer;transition:all .25s;position:relative;border-radius:2px}
 .upload-zone:hover,.upload-zone.drag{border-color:rgba(255,214,0,.5);background:rgba(255,214,0,.03)}
 .upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 .upload-zone .uz-icon{font-size:2.2rem;margin-bottom:.5rem}
 .upload-zone p{font-size:.85rem;color:rgba(255,255,255,.35)}
 .upload-zone small{font-size:.75rem;color:rgba(255,255,255,.2)}
-
-/* IMG PREVIEW */
 .img-prev-wrap{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.8rem}
 .img-prev{width:80px;height:80px;position:relative;border:1px solid rgba(255,214,0,.2)}
 .img-prev img{width:100%;height:100%;object-fit:cover}
 .img-prev .rm{position:absolute;top:-7px;right:-7px;width:20px;height:20px;background:#ff5252;color:#fff;border:none;cursor:pointer;font-size:.7rem;border-radius:50%;display:flex;align-items:center;justify-content:center}
-
-/* UPLOAD PROGRESS */
 .upload-progress{margin-top:.8rem;background:rgba(255,214,0,.1);height:4px;overflow:hidden;display:none}
 .upload-progress-fill{height:100%;background:var(--y);transition:width .3s}
-
-/* DIVIDER */
 .divider{border:none;border-top:1px solid rgba(255,255,255,.06);margin:1.5rem 0}
-
-/* GITHUB SETUP */
-.gh-setup{background:rgba(255,214,0,.04);border:1px solid rgba(255,214,0,.15);padding:1.2rem 1.5rem;margin-bottom:1.5rem;display:flex;gap:1rem;align-items:flex-start}
-.gh-setup .gh-icon{font-size:1.8rem;flex-shrink:0}
-.gh-setup h4{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--y);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem}
-.gh-setup p{font-size:.85rem;color:rgba(255,255,255,.5);line-height:1.55}
-.gh-setup a{color:var(--y);text-decoration:none}
-.gh-setup a:hover{text-decoration:underline}
-.gh-connected{display:flex;align-items:center;gap:.5rem;font-family:'Barlow Condensed',sans-serif;font-size:.82rem;color:#4caf50;text-transform:uppercase;letter-spacing:.08em}
-.gh-connected::before{content:'';width:8px;height:8px;border-radius:50%;background:#4caf50;display:block}
-
-/* SERVICE / CAT ITEM */
+.gh-box{background:rgba(255,214,0,.04);border:1px solid rgba(255,214,0,.15);padding:1.2rem 1.5rem;margin-bottom:1.5rem;display:flex;gap:1rem;align-items:flex-start}
+.gh-box .gi{font-size:1.8rem;flex-shrink:0}
+.gh-box h4{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--y);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem}
+.gh-box p{font-size:.85rem;color:rgba(255,255,255,.5);line-height:1.55}
+.gh-box a{color:var(--y);text-decoration:none}.gh-box a:hover{text-decoration:underline}
 .list-item{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.2rem;background:var(--bs);border-left:3px solid var(--y);margin-bottom:.6rem}
-.list-item-left{display:flex;align-items:center;gap:1rem}
-.list-item-icon{font-size:1.4rem}
-.list-item-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;color:var(--w);text-transform:uppercase;letter-spacing:.05em}
-.list-item-desc{font-size:.82rem;color:rgba(255,255,255,.4)}
-
-/* TABS */
+.li-left{display:flex;align-items:center;gap:1rem}
+.li-icon{font-size:1.4rem}
+.li-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;color:var(--w);text-transform:uppercase;letter-spacing:.05em}
+.li-desc{font-size:.82rem;color:rgba(255,255,255,.4)}
 .tabs{display:flex;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:1.5rem}
 .tab{background:none;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.88rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.35);padding:.8rem 1.2rem;border-bottom:2px solid transparent;transition:all .2s}
-.tab:hover{color:var(--w)}
-.tab.active{color:var(--y);border-bottom-color:var(--y)}
-
-/* TOAST */
+.tab:hover{color:var(--w)}.tab.active{color:var(--y);border-bottom-color:var(--y)}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--y);color:var(--b);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:.1em;text-transform:uppercase;padding:12px 22px;z-index:9999;transition:transform .3s;pointer-events:none;white-space:nowrap}
-.toast.show{transform:translateX(-50%) translateY(0)}
-.toast.err{background:#ff5252;color:#fff}
-.toast.info{background:var(--bm);color:var(--y);border:1px solid rgba(255,214,0,.3)}
-
-/* PAGE SECTIONS */
+.toast.show{transform:translateX(-50%) translateY(0)}.toast.err{background:#ff5252;color:#fff}
 .page{display:none}.page.active{display:block}
-
-@keyframes scaleIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-
-/* RESPONSIVE */
+.disc-preview{margin-top:.5rem;font-size:.82rem;color:#ff4d4d;font-family:'Barlow Condensed',sans-serif;font-weight:600;letter-spacing:.05em;min-height:1.2rem}
 @media(max-width:1024px){.stat-cards{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:768px){
-  .sidebar{width:200px}.main{margin-left:200px}
-  .fg,.fg-3{grid-template-columns:1fr}
-  .fg .s2{grid-column:1}
-  .stat-cards{grid-template-columns:repeat(2,1fr)}
-}
-@media(max-width:600px){
-  .sidebar{transform:translateX(-100%);transition:transform .3s}.sidebar.open{transform:translateX(0)}
-  .main{margin-left:0}
-  .topbar{padding:.8rem 1rem}
-  .content{padding:1rem}
-  .stat-cards{grid-template-columns:1fr 1fr}
-}
+@media(max-width:768px){.sidebar{width:200px}.main{margin-left:200px}.fg,.fg-3{grid-template-columns:1fr}.fg .s2{grid-column:1}.stat-cards{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.sidebar{transform:translateX(-100%);transition:transform .3s}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.content{padding:1rem}.stat-cards{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
-
-<!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-logo">POWER <span>ONE</span> PY</div>
     <div class="login-sub">Panel de Administración</div>
-    <label class="form-label">Contraseña</label>
-    <input class="form-input" type="password" id="loginPass" placeholder="Ingresá tu contraseña" onkeydown="if(event.key==='Enter')doLogin()">
-    <div class="form-error" id="loginErr"></div>
+    <label class="fl">Contraseña</label>
+    <input class="fi" type="password" id="loginPass" placeholder="Ingresá tu contraseña" onkeydown="if(event.key==='Enter')doLogin()">
+    <div class="ferr" id="loginErr"></div>
     <button class="btn-y btn-full" onclick="doLogin()">⚡ INGRESAR</button>
     <p style="font-size:.72rem;color:rgba(255,255,255,.18);text-align:center;margin-top:1rem">Contraseña por defecto: admin123</p>
   </div>
 </div>
 
-<!-- APP -->
 <div id="app">
-  <!-- SIDEBAR -->
   <div class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <div class="sidebar-logo-text">POWER <span>ONE</span> PY</div>
@@ -188,23 +118,21 @@ textarea.form-input{resize:vertical}
       <div class="nav-item active" onclick="goPage('dashboard')"><span class="ni">📊</span> Dashboard</div>
       <div class="nav-item" onclick="goPage('products')"><span class="ni">📦</span> Productos</div>
       <div class="nav-item" onclick="goPage('addProduct')"><span class="ni">➕</span> Agregar Producto</div>
+      <div class="nav-item" onclick="goPage('streaming')"><span class="ni">🎬</span> Streaming</div>
       <div class="nav-item" onclick="goPage('services')"><span class="ni">⚡</span> Servicios</div>
       <div class="nav-item" onclick="goPage('settings')"><span class="ni">⚙</span> Configuración</div>
     </nav>
     <div class="sidebar-footer">
-      <div><span class="status-dot" id="ghDot"></span><span id="ghStatusLabel" style="font-size:.75rem;color:rgba(255,255,255,.5);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em">GitHub</span></div>
-      <p>Cloudinary ☁ Activo</p>
-      <div style="margin-top:1rem">
-        <button class="btn-ghost" style="width:100%;justify-content:center" onclick="doLogout()">Cerrar sesión</button>
-      </div>
+      <div><span class="sdot" id="ghDot" style="background:#ff5252"></span><span id="ghStatusLabel" style="font-size:.75rem;color:rgba(255,255,255,.4);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em">GitHub</span></div>
+      <p style="font-size:.75rem;color:rgba(255,255,255,.25);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;margin-top:.4rem">Cloudinary ☁ Activo</p>
+      <div style="margin-top:1rem"><button class="btn-ghost" style="width:100%;justify-content:center" onclick="doLogout()">Cerrar sesión</button></div>
     </div>
   </div>
 
-  <!-- MAIN -->
   <div class="main">
     <div class="topbar">
       <h1 id="pageTitle">DASHBOARD</h1>
-      <div class="topbar-actions">
+      <div style="display:flex;gap:.8rem;align-items:center">
         <a href="index.html" class="btn-ghost" target="_blank">🌐 Ver sitio</a>
       </div>
     </div>
@@ -215,7 +143,7 @@ textarea.form-input{resize:vertical}
         <div class="stat-cards">
           <div class="scard"><div class="scard-num" id="dProd">—</div><div class="scard-label">Productos</div></div>
           <div class="scard"><div class="scard-num" id="dCat">—</div><div class="scard-label">Categorías</div></div>
-          <div class="scard"><div class="scard-num" id="dSvc">—</div><div class="scard-label">Servicios</div></div>
+          <div class="scard"><div class="scard-num" id="dStream">—</div><div class="scard-label">Streaming</div></div>
           <div class="scard"><div class="scard-num">☁</div><div class="scard-label">Cloudinary OK</div></div>
         </div>
         <div class="panel">
@@ -223,25 +151,15 @@ textarea.form-input{resize:vertical}
           <div class="panel-body" id="dashLastProds"></div>
         </div>
         <div class="panel" id="ghSetupPanel">
-          <div class="panel-head"><div class="panel-title">⚙ CONFIGURACIÓN GITHUB</div></div>
+          <div class="panel-head"><div class="panel-title">⚙ CONFIGURAR GITHUB</div></div>
           <div class="panel-body">
-            <div class="gh-setup">
-              <div class="gh-icon">🔗</div>
-              <div>
-                <h4>Conectá con GitHub para guardar cambios</h4>
-                <p>Para que los productos se guarden en <strong>productos.json</strong> y el sitio se actualice automáticamente en Netlify, necesitás configurar tu token de GitHub y el nombre del repositorio.<br><br>
-                <a href="https://github.com/settings/tokens/new?scopes=repo" target="_blank">→ Crear token en GitHub</a> (marcá el permiso <code>repo</code>)</p>
-              </div>
-            </div>
+            <div class="gh-box"><div class="gi">🔗</div><div>
+              <h4>Conectá con GitHub para sincronizar</h4>
+              <p>Cada cambio que guardés se escribe en <strong>productos.json</strong> y Netlify redesplega el sitio automáticamente.<br><a href="https://github.com/settings/tokens/new?scopes=repo" target="_blank">→ Crear token en GitHub</a> (permiso <code>repo</code>)</p>
+            </div></div>
             <div class="fg">
-              <div>
-                <label class="form-label">GitHub Token (Personal Access Token)</label>
-                <input class="form-input" type="password" id="cfgGhToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-              </div>
-              <div>
-                <label class="form-label">Repositorio (usuario/nombre)</label>
-                <input class="form-input" type="text" id="cfgGhRepo" placeholder="tuusuario/poweronepy">
-              </div>
+              <div><label class="fl">GitHub Token</label><input class="fi" type="password" id="cfgGhToken" placeholder="ghp_xxxxxxxxxxxx"></div>
+              <div><label class="fl">Repositorio (usuario/nombre)</label><input class="fi" type="text" id="cfgGhRepo" placeholder="tuusuario/poweronepy"></div>
             </div>
             <button class="btn-y" onclick="saveGhConfig()">💾 GUARDAR Y CONECTAR</button>
           </div>
@@ -251,73 +169,39 @@ textarea.form-input{resize:vertical}
       <!-- PRODUCTS LIST -->
       <div class="page" id="pageProducts">
         <div class="panel">
-          <div class="panel-head">
-            <div class="panel-title">PRODUCTOS (<span id="prodCount">0</span>)</div>
-            <button class="btn-y" onclick="goPage('addProduct')">+ Agregar Producto</button>
-          </div>
-          <div class="panel-body">
-            <div id="productsTableWrap"></div>
-          </div>
+          <div class="panel-head"><div class="panel-title">PRODUCTOS (<span id="prodCount">0</span>)</div><button class="btn-y" onclick="goPage('addProduct')">+ Agregar</button></div>
+          <div class="panel-body" id="productsTableWrap"></div>
         </div>
       </div>
 
-      <!-- ADD / EDIT PRODUCT -->
+      <!-- ADD/EDIT PRODUCT -->
       <div class="page" id="pageAddProduct">
         <div class="panel">
-          <div class="panel-head">
-            <div class="panel-title" id="formTitle">AGREGAR PRODUCTO</div>
-            <button class="btn-ghost" onclick="goPage('products')">← Volver</button>
-          </div>
+          <div class="panel-head"><div class="panel-title" id="formTitle">AGREGAR PRODUCTO</div><button class="btn-ghost" onclick="goPage('products')">← Volver</button></div>
           <div class="panel-body">
             <input type="hidden" id="editId">
             <div class="fg">
+              <div><label class="fl">Nombre *</label><input class="fi" type="text" id="pName" placeholder="Ej: Auricular Bluetooth X200"></div>
+              <div><label class="fl">Categoría *</label><select class="fi" id="pCat"><option value="">Seleccionar...</option></select></div>
+              <div class="s2"><label class="fl">Descripción</label><textarea class="fi" id="pDesc" rows="3" placeholder="Descripción del producto..."></textarea></div>
+              <div><label class="fl">Precio</label><input class="fi" type="text" id="pPrice" placeholder="Ej: 150.000 Gs." oninput="previewDiscount()"></div>
+              <div><label class="fl">Badge / Etiqueta</label><select class="fi" id="pBadge"><option value="">Sin etiqueta</option><option value="Nuevo">Nuevo</option><option value="Oferta">Oferta</option><option value="Hot">Hot</option><option value="Último">Último</option></select></div>
               <div>
-                <label class="form-label">Nombre del producto *</label>
-                <input class="form-input" type="text" id="pName" placeholder="Ej: Auricular Bluetooth X200">
-              </div>
-              <div>
-                <label class="form-label">Categoría *</label>
-                <select class="form-input" id="pCat"><option value="">Seleccionar...</option></select>
+                <label class="fl">Descuento temporal (%)</label>
+                <input class="fi" type="number" id="pDiscount" placeholder="Ej: 20" min="0" max="99" oninput="previewDiscount()">
+                <div class="disc-preview" id="discPreview"></div>
               </div>
               <div class="s2">
-                <label class="form-label">Descripción</label>
-                <textarea class="form-input" id="pDesc" rows="3" placeholder="Descripción del producto..."></textarea>
-              </div>
-              <div>
-                <label class="form-label">Precio</label>
-                <input class="form-input" type="text" id="pPrice" placeholder="Ej: 150.000 Gs." oninput="previewDiscount()">
-              </div>
-              <div>
-                <label class="form-label">Badge / Etiqueta</label>
-                <select class="form-input" id="pBadge">
-                  <option value="">Sin etiqueta</option>
-                  <option value="Nuevo">🟡 Nuevo</option>
-                  <option value="Oferta">🔥 Oferta</option>
-                  <option value="Hot">⚡ Hot</option>
-                  <option value="Último">⚠ Último</option>
-                </select>
-              </div>
-              <div>
-                <label class="form-label">Descuento temporal (%)</label>
-                <input class="form-input" type="number" id="pDiscount" placeholder="Ej: 20 (dejar vacío si no aplica)" min="0" max="99" oninput="previewDiscount()">
-                <div id="discPreview" style="margin-top:.5rem;font-size:.82rem;color:#ff4d4d;font-family:'Barlow Condensed',sans-serif;font-weight:600;letter-spacing:.05em;min-height:1.2rem"></div>
-              </div>
-              <div class="s2">
-                <label class="form-label">Imagen del producto</label>
+                <label class="fl">Imagen del producto</label>
                 <div class="upload-zone" id="uploadZone">
                   <input type="file" id="pImgFile" accept="image/jpeg,image/png,image/webp,image/gif" onchange="handleImgSelect(this)">
                   <div class="uz-icon">📷</div>
-                  <p>Hacé clic o arrastrá una imagen aquí</p>
-                  <small>JPG, PNG, WebP — Máx 5MB — Se sube a Cloudinary automáticamente</small>
+                  <p>Hacé clic o arrastrá una imagen</p>
+                  <small>JPG, PNG, WebP — Máx 5MB — Sube a Cloudinary</small>
                 </div>
-                <div class="upload-progress" id="uploadProgress">
-                  <div class="upload-progress-fill" id="uploadProgressFill" style="width:0%"></div>
-                </div>
+                <div class="upload-progress" id="uploadProgress"><div class="upload-progress-fill" id="uploadProgressFill" style="width:0%"></div></div>
                 <div class="img-prev-wrap" id="imgPreview"></div>
-                <div style="margin-top:.8rem">
-                  <label class="form-label" style="color:rgba(255,255,255,.3)">O URL de imagen (opcional)</label>
-                  <input class="form-input" type="text" id="pImgUrl" placeholder="https://res.cloudinary.com/...">
-                </div>
+                <div style="margin-top:.8rem"><label class="fl" style="color:rgba(255,255,255,.3)">O URL de imagen</label><input class="fi" type="text" id="pImgUrl" placeholder="https://res.cloudinary.com/..."></div>
               </div>
             </div>
             <hr class="divider">
@@ -329,27 +213,37 @@ textarea.form-input{resize:vertical}
         </div>
       </div>
 
+      <!-- STREAMING -->
+      <div class="page" id="pageStreaming">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">SERVICIOS DE STREAMING</div></div>
+          <div class="panel-body">
+            <div id="streamAdminList"></div>
+            <hr class="divider">
+            <h4 style="font-family:'Barlow Condensed',sans-serif;color:var(--y);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1rem">+ Agregar Servicio</h4>
+            <div class="fg-3">
+              <div><label class="fl">Nombre</label><input class="fi" type="text" id="stName" placeholder="Netflix"></div>
+              <div><label class="fl">Ícono (emoji)</label><input class="fi" type="text" id="stIcon" placeholder="🎬" maxlength="4"></div>
+              <div><label class="fl">Precio/mes</label><input class="fi" type="text" id="stPrice" placeholder="25.000 Gs."></div>
+              <div class="s2"><label class="fl">Descripción</label><input class="fi" type="text" id="stDesc" placeholder="Descripción breve..."></div>
+            </div>
+            <button class="btn-y" onclick="addStreaming()">+ AGREGAR</button>
+          </div>
+        </div>
+      </div>
+
       <!-- SERVICES -->
       <div class="page" id="pageServices">
         <div class="panel">
-          <div class="panel-head"><div class="panel-title">SERVICIOS — ONE STORE PY</div></div>
+          <div class="panel-head"><div class="panel-title">GARANTÍAS Y SERVICIOS</div></div>
           <div class="panel-body">
             <div id="svcAdminList"></div>
             <hr class="divider">
-            <h4 style="font-family:'Barlow Condensed',sans-serif;color:var(--y);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1rem;">+ Agregar Servicio</h4>
+            <h4 style="font-family:'Barlow Condensed',sans-serif;color:var(--y);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1rem">+ Agregar</h4>
             <div class="fg-3">
-              <div>
-                <label class="form-label">Nombre</label>
-                <input class="form-input" type="text" id="sName" placeholder="Ej: Garantía oficial">
-              </div>
-              <div>
-                <label class="form-label">Ícono (emoji)</label>
-                <input class="form-input" type="text" id="sIcon" placeholder="🔧" maxlength="4">
-              </div>
-              <div>
-                <label class="form-label">Descripción</label>
-                <input class="form-input" type="text" id="sDesc" placeholder="Descripción breve">
-              </div>
+              <div><label class="fl">Nombre</label><input class="fi" type="text" id="sName" placeholder="Garantía oficial"></div>
+              <div><label class="fl">Ícono</label><input class="fi" type="text" id="sIcon" placeholder="🔧" maxlength="4"></div>
+              <div><label class="fl">Descripción</label><input class="fi" type="text" id="sDesc" placeholder="Descripción breve"></div>
             </div>
             <button class="btn-y" onclick="addService()">+ AGREGAR</button>
           </div>
@@ -359,699 +253,307 @@ textarea.form-input{resize:vertical}
       <!-- SETTINGS -->
       <div class="page" id="pageSettings">
         <div class="tabs">
-          <button class="tab active" onclick="switchSettingsTab('tabGeneral')">General</button>
-          <button class="tab" onclick="switchSettingsTab('tabGithub')">GitHub / Deploy</button>
-          <button class="tab" onclick="switchSettingsTab('tabCategories')">Categorías</button>
-          <button class="tab" onclick="switchSettingsTab('tabSecurity')">Seguridad</button>
+          <button class="tab active" onclick="switchSettingsTab('tabGeneral',this)">General</button>
+          <button class="tab" onclick="switchSettingsTab('tabGithub',this)">GitHub</button>
+          <button class="tab" onclick="switchSettingsTab('tabCats',this)">Categorías</button>
+          <button class="tab" onclick="switchSettingsTab('tabSecurity',this)">Seguridad</button>
         </div>
-
         <div id="tabGeneral">
-          <div class="panel">
-            <div class="panel-head"><div class="panel-title">INFORMACIÓN GENERAL</div></div>
+          <div class="panel"><div class="panel-head"><div class="panel-title">INFORMACIÓN GENERAL</div></div>
             <div class="panel-body">
               <div class="fg">
-                <div>
-                  <label class="form-label">WhatsApp (solo números)</label>
-                  <input class="form-input" type="text" id="cfgWa" placeholder="595981000000">
-                </div>
-                <div>
-                  <label class="form-label">Ciudad / País</label>
-                  <input class="form-input" type="text" id="cfgCity" placeholder="Asunción, Paraguay">
-                </div>
-                <div>
-                  <label class="form-label">Email</label>
-                  <input class="form-input" type="text" id="cfgEmail" placeholder="info@poweronepy.com">
-                </div>
-                <div>
-                  <label class="form-label">Dirección</label>
-                  <input class="form-input" type="text" id="cfgAddr" placeholder="Calle 123, Asunción">
-                </div>
-                <div>
-                  <label class="form-label">Horario de atención</label>
-                  <input class="form-input" type="text" id="cfgHours" placeholder="Lun-Sáb 08:00 - 18:00">
-                </div>
-                <div class="s2">
-                  <label class="form-label">Descripción principal (hero)</label>
-                  <textarea class="form-input" id="cfgHeroDesc" rows="2" placeholder="Texto del inicio..."></textarea>
-                </div>
+                <div><label class="fl">WhatsApp (solo números)</label><input class="fi" type="text" id="cfgWa" placeholder="595981000000"></div>
+                <div><label class="fl">Ciudad / País</label><input class="fi" type="text" id="cfgCity"></div>
+                <div><label class="fl">Email</label><input class="fi" type="text" id="cfgEmail"></div>
+                <div><label class="fl">Dirección</label><input class="fi" type="text" id="cfgAddr"></div>
+                <div><label class="fl">Horario</label><input class="fi" type="text" id="cfgHours"></div>
+                <div class="s2"><label class="fl">Descripción hero</label><textarea class="fi" id="cfgHeroDesc" rows="2"></textarea></div>
               </div>
               <button class="btn-y" onclick="saveSettings()">💾 GUARDAR</button>
             </div>
           </div>
         </div>
-
         <div id="tabGithub" style="display:none">
-          <div class="panel">
-            <div class="panel-head"><div class="panel-title">GITHUB & NETLIFY DEPLOY</div></div>
+          <div class="panel"><div class="panel-head"><div class="panel-title">GITHUB & NETLIFY</div></div>
             <div class="panel-body">
-              <div class="gh-setup">
-                <div class="gh-icon">📖</div>
-                <div>
-                  <h4>¿Cómo funciona?</h4>
-                  <p>Al guardar cualquier cambio (productos, servicios, config), el admin actualiza <strong>productos.json</strong> en tu repositorio de GitHub.<br>Netlify detecta el cambio y redespliega el sitio automáticamente en ~30 segundos.<br><br>
-                  Necesitás: <a href="https://github.com/settings/tokens/new?scopes=repo" target="_blank">Personal Access Token</a> con permiso <code>repo</code></p>
-                </div>
-              </div>
+              <div class="gh-box"><div class="gi">📖</div><div>
+                <h4>¿Cómo funciona?</h4>
+                <p>Cada guardar actualiza <strong>productos.json</strong> en GitHub. Netlify redesplega en ~30s.<br><a href="https://github.com/settings/tokens/new?scopes=repo" target="_blank">Crear token</a> con permiso <code>repo</code></p>
+              </div></div>
               <div class="fg">
-                <div>
-                  <label class="form-label">GitHub Token</label>
-                  <input class="form-input" type="password" id="cfgGhToken2" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-                </div>
-                <div>
-                  <label class="form-label">Repositorio (usuario/repo)</label>
-                  <input class="form-input" type="text" id="cfgGhRepo2" placeholder="tuusuario/poweronepy">
-                </div>
-                <div>
-                  <label class="form-label">Branch</label>
-                  <input class="form-input" type="text" id="cfgGhBranch" placeholder="main" value="main">
-                </div>
+                <div><label class="fl">Token GitHub</label><input class="fi" type="password" id="cfgGhToken2" placeholder="ghp_xxxx"></div>
+                <div><label class="fl">Repositorio</label><input class="fi" type="text" id="cfgGhRepo2" placeholder="usuario/repo"></div>
+                <div><label class="fl">Branch</label><input class="fi" type="text" id="cfgGhBranch" value="main"></div>
               </div>
               <div style="display:flex;gap:1rem;flex-wrap:wrap">
-                <button class="btn-y" onclick="saveGhConfig2()">💾 GUARDAR CONEXIÓN</button>
-                <button class="btn-ghost" onclick="testGhConnection()">🔄 Probar conexión</button>
+                <button class="btn-y" onclick="saveGhConfig2()">💾 GUARDAR</button>
+                <button class="btn-ghost" onclick="testGhConnection()">🔄 Probar</button>
               </div>
               <div id="ghTestResult" style="margin-top:1rem;font-size:.85rem;color:rgba(255,255,255,.4)"></div>
             </div>
           </div>
         </div>
-
-        <div id="tabCategories" style="display:none">
-          <div class="panel">
-            <div class="panel-head"><div class="panel-title">GESTIONAR CATEGORÍAS</div></div>
+        <div id="tabCats" style="display:none">
+          <div class="panel"><div class="panel-head"><div class="panel-title">CATEGORÍAS</div></div>
             <div class="panel-body">
               <div id="catAdminList"></div>
               <hr class="divider">
-              <h4 style="font-family:'Barlow Condensed',sans-serif;color:var(--y);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1rem;">+ Nueva Categoría</h4>
               <div style="display:flex;gap:.8rem;flex-wrap:wrap;align-items:flex-end">
-                <div style="flex:1;min-width:160px">
-                  <label class="form-label">Nombre</label>
-                  <input class="form-input" type="text" id="newCatName" placeholder="Ej: Seguridad Hogar">
-                </div>
-                <div style="width:90px">
-                  <label class="form-label">Ícono</label>
-                  <input class="form-input" type="text" id="newCatIcon" placeholder="🏠" maxlength="4">
-                </div>
+                <div style="flex:1;min-width:160px"><label class="fl">Nombre</label><input class="fi" type="text" id="newCatName" placeholder="Electrónica"></div>
+                <div style="width:90px"><label class="fl">Ícono</label><input class="fi" type="text" id="newCatIcon" placeholder="📱" maxlength="4"></div>
                 <button class="btn-y" onclick="addCategory()">+ AGREGAR</button>
               </div>
             </div>
           </div>
         </div>
-
         <div id="tabSecurity" style="display:none">
-          <div class="panel">
-            <div class="panel-head"><div class="panel-title">SEGURIDAD</div></div>
+          <div class="panel"><div class="panel-head"><div class="panel-title">SEGURIDAD</div></div>
             <div class="panel-body">
               <div style="max-width:400px">
-                <label class="form-label">Nueva contraseña de administrador</label>
-                <input class="form-input" type="password" id="cfgNewPass" placeholder="Nueva contraseña">
-                <label class="form-label">Confirmar contraseña</label>
-                <input class="form-input" type="password" id="cfgConfPass" placeholder="Repetir contraseña">
-                <div class="form-error" id="passErr"></div>
-                <button class="btn-y" onclick="changePassword()">🔒 CAMBIAR CONTRASEÑA</button>
+                <label class="fl">Nueva contraseña</label><input class="fi" type="password" id="cfgNewPass" placeholder="Nueva contraseña">
+                <label class="fl">Confirmar</label><input class="fi" type="password" id="cfgConfPass" placeholder="Repetir contraseña">
+                <div class="ferr" id="passErr"></div>
+                <button class="btn-y" onclick="changePassword()">🔒 CAMBIAR</button>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-    </div><!-- /content -->
-  </div><!-- /main -->
-</div><!-- /app -->
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════════════
-// CLOUDINARY CONFIG
-// ═══════════════════════════════════════════════
-const CLOUD_NAME = 'drzu2lb6c';
-const UPLOAD_PRESET = 'poweronepy';
-const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
+const CLOUD_NAME='drzu2lb6c',UPLOAD_PRESET='poweronepy';
+const CLOUDINARY_URL=`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
+const LS='popy_store',LS_SESSION='popy_admin_session',LS_GH='popy_gh';
+let DB=loadDB(),tempImg=null;
 
-// ═══════════════════════════════════════════════
-// DATA (localStorage)
-// ═══════════════════════════════════════════════
-const LS = 'popy_store';
-const LS_ADMIN = 'popy_admin_session';
-const LS_GH = 'popy_gh';
+function loadDB(){try{return JSON.parse(localStorage.getItem(LS))||defaultDB();}catch(e){return defaultDB();}}
+function saveDB(){localStorage.setItem(LS,JSON.stringify(DB));}
+function getGh(){try{return JSON.parse(localStorage.getItem(LS_GH))||{};}catch(e){return {};}}
+function saveGhCfg(cfg){localStorage.setItem(LS_GH,JSON.stringify(cfg));}
 
-let DB = loadDB();
-let tempImg = null; // { url, public_id }
+function defaultDB(){return{password:'admin123',
+  products:[{id:1,name:'Auricular Bluetooth Pro',cat:'Electrónica',desc:'Inalámbrico con cancelación de ruido.',price:'150.000 Gs.',badge:'Nuevo',img:'',discount:''},{id:2,name:'Teclado Mecánico RGB',cat:'Informática',desc:'Switches azules y RGB completo.',price:'280.000 Gs.',badge:'',img:'',discount:'15'},{id:3,name:'Autoradio 2DIN Android',cat:'Car Audio',desc:'Pantalla táctil, Android Auto, GPS.',price:'450.000 Gs.',badge:'Hot',img:'',discount:''}],
+  categories:[{id:1,name:'Electrónica',icon:'📱'},{id:2,name:'Informática',icon:'💻'},{id:3,name:'Car Audio',icon:'🚗'}],
+  streaming:[{id:1,name:'Netflix',icon:'🎬',desc:'Plan con anuncios o premium.',price:'25.000 Gs.',combo:true},{id:2,name:'Disney+',icon:'🏰',desc:'Disney, Marvel, Star Wars.',price:'22.000 Gs.',combo:true},{id:3,name:'HBO Max',icon:'👑',desc:'Series HBO, Warner y exclusivos.',price:'22.000 Gs.',combo:true},{id:4,name:'Spotify',icon:'🎵',desc:'Música sin anuncios, descargas.',price:'15.000 Gs.',combo:true},{id:5,name:'YouTube Premium',icon:'▶️',desc:'Sin anuncios + YouTube Music.',price:'18.000 Gs.',combo:true},{id:6,name:'Prime Video',icon:'📦',desc:'Series y películas Amazon.',price:'18.000 Gs.',combo:true},{id:7,name:'Paramount+',icon:'⭐',desc:'CBS, MTV, Nickelodeon y más.',price:'18.000 Gs.',combo:true},{id:8,name:'Apple TV+',icon:'🍎',desc:'Apple Originals exclusivos.',price:'20.000 Gs.',combo:true}],
+  services:[{id:1,icon:'🛡️',name:'Garantía de fábrica',desc:'Todos los productos con garantía oficial.'},{id:2,icon:'🚚',name:'Envío a todo el país',desc:'Encomienda a cualquier punto.'},{id:3,icon:'💬',name:'Asesoramiento',desc:'Te ayudamos a elegir el producto ideal.'},{id:4,icon:'💳',name:'Facilidades de pago',desc:'Transferencia, efectivo y cuotas.'}],
+  config:{wa:'595981570126',city:'Asunción, Paraguay',email:'info@poweronepy.com',address:'Asunción, Paraguay',hours:'Lun-Sáb 08:00 - 18:00',heroDesc:'Tu destino de tecnología en Paraguay.'}
+};}
 
-function loadDB() {
-  try { return JSON.parse(localStorage.getItem(LS)) || defaultDB(); }
-  catch(e) { return defaultDB(); }
-}
-function saveDB() { localStorage.setItem(LS, JSON.stringify(DB)); }
-
-function defaultDB() {
-  return {
-    password: 'admin123',
-    products: [
-      {id:1,name:'Auricular Bluetooth Pro',cat:'Electrónica',desc:'Auriculares inalámbricos con cancelación de ruido y 30hs de batería.',price:'150.000 Gs.',badge:'Nuevo',img:''},
-      {id:2,name:'Teclado Mecánico RGB',cat:'Informática',desc:'Teclado mecánico con switches azules y retroiluminación RGB.',price:'280.000 Gs.',badge:'Hot',img:''},
-      {id:3,name:'Autoradio 2DIN Android',cat:'Car Audio',desc:'Pantalla táctil, Android Auto, WiFi y GPS.',price:'450.000 Gs.',badge:'Oferta',img:''},
-    ],
-    categories:[{id:1,name:'Electrónica',icon:'📱'},{id:2,name:'Informática',icon:'💻'},{id:3,name:'Car Audio',icon:'🚗'}],
-    services:[
-      {id:1,icon:'🛡️',name:'Garantía de fábrica',desc:'Todos nuestros productos cuentan con garantía oficial.'},
-      {id:2,icon:'🚚',name:'Envío a todo el país',desc:'Enviamos por encomienda a cualquier punto de Paraguay.'},
-      {id:3,icon:'💬',name:'Asesoramiento personalizado',desc:'Te ayudamos a elegir el producto ideal.'},
-      {id:4,icon:'💳',name:'Facilidades de pago',desc:'Transferencia, efectivo y cuotas sin interés.'},
-    ],
-    config:{wa:'595981570126',city:'Asunción, Paraguay',email:'info@poweronepy.com',address:'Asunción, Paraguay',hours:'Lun-Sáb 08:00 - 18:00',heroDesc:'Tu destino de tecnología en Paraguay.'}
-  };
-}
-
-function getGhConfig() {
-  try { return JSON.parse(localStorage.getItem(LS_GH)) || {}; } catch(e){ return {}; }
-}
-function saveGhCfg(cfg) { localStorage.setItem(LS_GH, JSON.stringify(cfg)); }
-
-// ═══════════════════════════════════════════════
 // AUTH
-// ═══════════════════════════════════════════════
-window.addEventListener('load', () => {
-  if (sessionStorage.getItem(LS_ADMIN) === 'yes') showApp();
-  updateGhStatus();
-});
+window.addEventListener('load',()=>{if(sessionStorage.getItem(LS_SESSION)==='yes')showApp();updateGhStatus();});
+function doLogin(){const p=document.getElementById('loginPass').value;if(p===DB.password){sessionStorage.setItem(LS_SESSION,'yes');showApp();}else{document.getElementById('loginErr').textContent='⚠ Contraseña incorrecta';}}
+function doLogout(){sessionStorage.removeItem(LS_SESSION);location.reload();}
+function showApp(){document.getElementById('loginScreen').style.display='none';document.getElementById('app').style.display='block';goPage('dashboard');}
 
-function doLogin() {
-  const pass = document.getElementById('loginPass').value;
-  if (pass === DB.password) {
-    sessionStorage.setItem(LS_ADMIN,'yes');
-    document.getElementById('loginErr').textContent = '';
-    showApp();
-  } else {
-    document.getElementById('loginErr').textContent = '⚠ Contraseña incorrecta';
-    document.getElementById('loginPass').style.borderColor = '#ff5252';
-  }
-}
-function doLogout() {
-  sessionStorage.removeItem(LS_ADMIN);
-  location.reload();
-}
-function showApp() {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  goPage('dashboard');
-}
-
-// ═══════════════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════════════
-const PAGE_TITLES = {dashboard:'Dashboard',products:'Productos',addProduct:'Agregar Producto',services:'Servicios',settings:'Configuración'};
-const NAV_ITEMS = document.querySelectorAll('.nav-item');
-
-function goPage(id) {
+// NAV
+const PAGES=['dashboard','products','addProduct','streaming','services','settings'];
+const TITLES={dashboard:'Dashboard',products:'Productos',addProduct:'Agregar Producto',streaming:'Streaming',services:'Servicios',settings:'Configuración'};
+function goPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page'+id.charAt(0).toUpperCase()+id.slice(1)).classList.add('active');
-  NAV_ITEMS.forEach((n,i)=>{
-    const pages = ['dashboard','products','addProduct','services','settings'];
-    n.classList.toggle('active', pages[i]===id);
-  });
-  document.getElementById('pageTitle').textContent = (PAGE_TITLES[id]||'').toUpperCase();
-  if(id==='dashboard') renderDashboard();
-  if(id==='products') renderProductsTable();
-  if(id==='addProduct') { if(!document.getElementById('editId').value) clearForm(); updateCatSelect(); }
-  if(id==='services') renderSvcAdmin();
-  if(id==='settings') loadSettings();
+  const pg=document.getElementById('page'+id.charAt(0).toUpperCase()+id.slice(1));if(pg)pg.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach((n,i)=>n.classList.toggle('active',PAGES[i]===id));
+  document.getElementById('pageTitle').textContent=(TITLES[id]||'').toUpperCase();
+  if(id==='dashboard')renderDashboard();
+  if(id==='products')renderProductsTable();
+  if(id==='addProduct'){if(!document.getElementById('editId').value)clearForm();updateCatSelect();}
+  if(id==='streaming')renderStreamAdmin();
+  if(id==='services')renderSvcAdmin();
+  if(id==='settings')loadSettings();
 }
 
-// ═══════════════════════════════════════════════
 // DASHBOARD
-// ═══════════════════════════════════════════════
-function renderDashboard() {
-  document.getElementById('dProd').textContent = DB.products.length;
-  document.getElementById('dCat').textContent = DB.categories.length;
-  document.getElementById('dSvc').textContent = DB.services.length;
-  const gh = getGhConfig();
-  document.getElementById('ghSetupPanel').style.display = (gh.token && gh.repo) ? 'none' : 'block';
-  if (gh.token) {
-    document.getElementById('cfgGhToken').value = gh.token;
-    document.getElementById('cfgGhRepo').value = gh.repo || '';
-  }
-  const last = [...DB.products].reverse().slice(0,5);
-  document.getElementById('dashLastProds').innerHTML = last.length
-    ? `<table class="tbl"><thead><tr><th>Img</th><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Badge</th></tr></thead><tbody>
-        ${last.map(p=>`<tr>
-          <td>${p.img?`<img src="${p.img}" onerror="this.style.display='none'">`:`<div class="no-img-thumb">${getCatIcon(p.cat)}</div>`}</td>
-          <td>${p.name}</td><td>${p.cat}</td><td>${p.price||'—'}</td>
-          <td>${p.badge?`<span class="badge-chip">${p.badge}</span>`:'—'}</td>
-        </tr>`).join('')}
-      </tbody></table>`
-    : `<p style="color:rgba(255,255,255,.3);padding:1.5rem 0;text-align:center">No hay productos aún. <button class="btn-ghost" onclick="goPage('addProduct')" style="margin-left:.5rem">Agregar primero</button></p>`;
+function renderDashboard(){
+  document.getElementById('dProd').textContent=DB.products.length;
+  document.getElementById('dCat').textContent=DB.categories.length;
+  document.getElementById('dStream').textContent=(DB.streaming||[]).length;
+  const gh=getGh();document.getElementById('ghSetupPanel').style.display=(gh.token&&gh.repo)?'none':'block';
+  if(gh.token){document.getElementById('cfgGhToken').value=gh.token;document.getElementById('cfgGhRepo').value=gh.repo||'';}
+  const last=[...DB.products].reverse().slice(0,5);
+  document.getElementById('dashLastProds').innerHTML=last.length?`<table class="tbl"><thead><tr><th>Img</th><th>Nombre</th><th>Cat</th><th>Precio</th><th>Badge</th></tr></thead><tbody>${last.map(p=>`<tr><td>${p.img?`<img src="${p.img}" onerror="this.style.display='none'">`:`<div class="nothumb">📦</div>`}</td><td>${p.name}</td><td>${p.cat}</td><td>${p.price||'—'}</td><td>${p.badge?`<span class="chip">${p.badge}</span>`:'—'}</td></tr>`).join('')}</tbody></table>`:`<p style="color:rgba(255,255,255,.3);padding:1.5rem;text-align:center">Sin productos. <button class="btn-ghost" onclick="goPage('addProduct')">Agregar</button></p>`;
 }
 
-// ═══════════════════════════════════════════════
 // PRODUCTS TABLE
-// ═══════════════════════════════════════════════
-function renderProductsTable() {
-  document.getElementById('prodCount').textContent = DB.products.length;
-  const el = document.getElementById('productsTableWrap');
-  if (!DB.products.length) { el.innerHTML=`<p style="color:rgba(255,255,255,.3);padding:2rem;text-align:center">No hay productos. <button class="btn-ghost" onclick="goPage('addProduct')">Agregar</button></p>`; return; }
-  el.innerHTML = `<table class="tbl"><thead><tr><th>Img</th><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Badge</th><th>Acciones</th></tr></thead><tbody>
-    ${DB.products.map(p=>`<tr>
-      <td>${p.img?`<img src="${p.img}" onerror="this.style.display='none'">`:`<div class="no-img-thumb">${getCatIcon(p.cat)}</div>`}</td>
-      <td><strong>${p.name}</strong><br><small style="color:rgba(255,255,255,.3)">${(p.desc||'').substring(0,50)}${p.desc&&p.desc.length>50?'…':''}</small></td>
-      <td>${p.cat}</td>
-      <td>${p.price||'—'}</td>
-      <td>${p.badge?`<span class="badge-chip">${p.badge}</span>`:'—'}</td>
-      <td><div class="td-actions">
-        <button class="btn-sm" onclick="editProduct(${p.id})">✏ Editar</button>
-        <button class="btn-sm del" onclick="deleteProduct(${p.id})">🗑 Eliminar</button>
-      </div></td>
-    </tr>`).join('')}
-  </tbody></table>`;
+function renderProductsTable(){
+  document.getElementById('prodCount').textContent=DB.products.length;
+  const el=document.getElementById('productsTableWrap');
+  if(!DB.products.length){el.innerHTML=`<p style="color:rgba(255,255,255,.3);padding:2rem;text-align:center">Sin productos. <button class="btn-ghost" onclick="goPage('addProduct')">Agregar</button></p>`;return;}
+  el.innerHTML=`<table class="tbl"><thead><tr><th>Img</th><th>Nombre</th><th>Cat</th><th>Precio</th><th>Desc%</th><th>Badge</th><th>Acciones</th></tr></thead><tbody>${DB.products.map(p=>`<tr><td>${p.img?`<img src="${p.img}" onerror="this.style.display='none'">`:`<div class="nothumb">📦</div>`}</td><td><strong>${p.name}</strong></td><td>${p.cat}</td><td>${p.price||'—'}</td><td>${p.discount?`<span class="chip" style="background:#ff4d4d;color:#fff">-${p.discount}%</span>`:'—'}</td><td>${p.badge?`<span class="chip">${p.badge}</span>`:'—'}</td><td><div class="td-actions"><button class="btn-sm" onclick="editProduct(${p.id})">✏ Editar</button><button class="btn-sm del" onclick="deleteProduct(${p.id})">🗑</button></div></td></tr>`).join('')}</tbody></table>`;
 }
 
-// ═══════════════════════════════════════════════
 // CLOUDINARY UPLOAD
-// ═══════════════════════════════════════════════
-async function handleImgSelect(input) {
-  const file = input.files[0];
-  if (!file) return;
-  if (file.size > 5*1024*1024) { showToast('Imagen demasiado grande (máx 5MB)', true); return; }
-  await uploadToCloudinary(file);
+async function handleImgSelect(input){const f=input.files[0];if(!f)return;if(f.size>5*1024*1024){showToast('Imagen demasiado grande (máx 5MB)',true);return;}await uploadToCloudinary(f);}
+async function uploadToCloudinary(file){
+  const btn=document.getElementById('saveProdBtn');const prog=document.getElementById('uploadProgress');const fill=document.getElementById('uploadProgressFill');
+  btn.disabled=true;btn.textContent='☁ Subiendo...';prog.style.display='block';fill.style.width='10%';
+  const fd=new FormData();fd.append('file',file);fd.append('upload_preset',UPLOAD_PRESET);fd.append('folder','poweronepy');
+  try{
+    let p=10;const t=setInterval(()=>{p=Math.min(p+8,85);fill.style.width=p+'%';},200);
+    const res=await fetch(CLOUDINARY_URL,{method:'POST',body:fd});clearInterval(t);
+    if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    const data=await res.json();fill.style.width='100%';
+    tempImg={url:data.secure_url,public_id:data.public_id};
+    document.getElementById('pImgUrl').value=data.secure_url;
+    document.getElementById('imgPreview').innerHTML=`<div class="img-prev"><img src="${data.secure_url}"><button class="rm" onclick="removeImg()">✕</button></div><div style="font-size:.8rem;color:#4caf50;margin-top:.5rem;font-family:'Barlow Condensed',sans-serif">✓ Subida a Cloudinary</div>`;
+    setTimeout(()=>{prog.style.display='none';fill.style.width='0%';},600);
+    showToast('✅ Imagen subida');
+  }catch(e){fill.style.width='0%';prog.style.display='none';showToast('❌ Error: '+e.message,true);}
+  finally{btn.disabled=false;btn.textContent='💾 GUARDAR PRODUCTO';}
 }
+function removeImg(){tempImg=null;document.getElementById('imgPreview').innerHTML='';document.getElementById('pImgFile').value='';document.getElementById('pImgUrl').value='';}
+const uz=document.getElementById('uploadZone');
+if(uz){uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('drag');});uz.addEventListener('dragleave',()=>uz.classList.remove('drag'));uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('drag');const f=e.dataTransfer.files[0];if(f)uploadToCloudinary(f);});}
 
-async function uploadToCloudinary(file) {
-  const btn = document.getElementById('saveProdBtn');
-  const prog = document.getElementById('uploadProgress');
-  const fill = document.getElementById('uploadProgressFill');
-  btn.disabled = true;
-  btn.textContent = '☁ Subiendo imagen...';
-  prog.style.display = 'block';
-  fill.style.width = '10%';
-
-  const fd = new FormData();
-  fd.append('file', file);
-  fd.append('upload_preset', UPLOAD_PRESET);
-  fd.append('folder', 'poweronepy');
-
-  try {
-    // Simulate progress
-    let p = 10;
-    const t = setInterval(()=>{ p = Math.min(p+8, 85); fill.style.width = p+'%'; }, 200);
-
-    const res = await fetch(CLOUDINARY_URL, { method:'POST', body:fd });
-    clearInterval(t);
-
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    fill.style.width = '100%';
-
-    tempImg = { url: data.secure_url, public_id: data.public_id };
-    document.getElementById('pImgUrl').value = data.secure_url;
-    document.getElementById('imgPreview').innerHTML = `
-      <div class="img-prev">
-        <img src="${data.secure_url}">
-        <button class="rm" onclick="removeImg()">✕</button>
-      </div>
-      <div style="font-size:.8rem;color:#4caf50;margin-top:.5rem;font-family:'Barlow Condensed',sans-serif">✓ Imagen subida a Cloudinary</div>`;
-
-    setTimeout(()=>{ prog.style.display='none'; fill.style.width='0%'; },600);
-    showToast('✅ Imagen subida correctamente');
-  } catch(e) {
-    fill.style.width='0%'; prog.style.display='none';
-    showToast('❌ Error al subir imagen: '+e.message, true);
-    console.error(e);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '💾 GUARDAR PRODUCTO';
-  }
-}
-
-function removeImg() {
-  tempImg = null;
-  document.getElementById('imgPreview').innerHTML = '';
-  document.getElementById('pImgFile').value = '';
-  document.getElementById('pImgUrl').value = '';
-}
-
-// Drag & drop
-const uz = document.getElementById('uploadZone');
-if (uz) {
-  uz.addEventListener('dragover', e=>{ e.preventDefault(); uz.classList.add('drag'); });
-  uz.addEventListener('dragleave', ()=>uz.classList.remove('drag'));
-  uz.addEventListener('drop', e=>{ e.preventDefault(); uz.classList.remove('drag'); const f=e.dataTransfer.files[0]; if(f)uploadToCloudinary(f); });
-}
-
-// ═══════════════════════════════════════════════
 // SAVE PRODUCT
-// ═══════════════════════════════════════════════
-function updateCatSelect() {
-  const sel = document.getElementById('pCat');
-  sel.innerHTML = '<option value="">Seleccionar...</option>' +
-    DB.categories.map(c=>`<option value="${c.name}">${c.icon} ${c.name}</option>`).join('');
+function updateCatSelect(){const s=document.getElementById('pCat');s.innerHTML='<option value="">Seleccionar...</option>'+DB.categories.map(c=>`<option value="${c.name}">${c.name}</option>`).join('');}
+async function saveProduct(){
+  const name=document.getElementById('pName').value.trim(),cat=document.getElementById('pCat').value;
+  if(!name||!cat){showToast('Nombre y categoría obligatorios',true);return;}
+  const desc=document.getElementById('pDesc').value.trim(),price=document.getElementById('pPrice').value.trim(),badge=document.getElementById('pBadge').value,discount=document.getElementById('pDiscount').value.trim();
+  const urlImg=document.getElementById('pImgUrl').value.trim(),img=(tempImg&&tempImg.url)||urlImg||'',editId=document.getElementById('editId').value;
+  if(editId){const idx=DB.products.findIndex(p=>p.id==editId);if(idx>-1)DB.products[idx]={...DB.products[idx],name,cat,desc,price,badge,discount,img};}
+  else{DB.products.push({id:Date.now(),name,cat,desc,price,badge,discount,img});}
+  saveDB();await pushToGithub();clearForm();showToast(editId?'✅ Producto actualizado':'✅ Producto guardado');goPage('products');
 }
-
-async function saveProduct() {
-  const name = document.getElementById('pName').value.trim();
-  const cat = document.getElementById('pCat').value;
-  if (!name || !cat) { showToast('Nombre y categoría son obligatorios', true); return; }
-
-  const desc = document.getElementById('pDesc').value.trim();
-  const price = document.getElementById('pPrice').value.trim();
-  const badge = document.getElementById('pBadge').value;
-  const discount = document.getElementById('pDiscount').value.trim();
-  const urlImg = document.getElementById('pImgUrl').value.trim();
-  const img = (tempImg && tempImg.url) || urlImg || '';
-  const editId = document.getElementById('editId').value;
-
-  if (editId) {
-    const idx = DB.products.findIndex(p=>p.id==editId);
-    if (idx>-1) DB.products[idx] = {...DB.products[idx], name, cat, desc, price, badge, discount, img};
-  } else {
-    DB.products.push({ id: Date.now(), name, cat, desc, price, badge, discount, img });
-  }
-
-  saveDB();
-  await pushToGithub();
-  clearForm();
-  showToast(editId ? '✅ Producto actualizado' : '✅ Producto guardado');
-  goPage('products');
-}
-
-function editProduct(id) {
-  const p = DB.products.find(x=>x.id==id);
-  if (!p) return;
+function editProduct(id){
+  const p=DB.products.find(x=>x.id==id);if(!p)return;
   goPage('addProduct');
   setTimeout(()=>{
-    document.getElementById('formTitle').textContent = 'EDITAR PRODUCTO';
-    document.getElementById('editId').value = p.id;
-    document.getElementById('pName').value = p.name;
-    updateCatSelect();
-    document.getElementById('pCat').value = p.cat;
-    document.getElementById('pDesc').value = p.desc||'';
-    document.getElementById('pPrice').value = p.price||'';
-    document.getElementById('pBadge').value = p.badge||'';
-    document.getElementById('pDiscount').value = p.discount||'';
-    document.getElementById('pImgUrl').value = p.img||'';
-    tempImg = p.img ? {url:p.img} : null;
-    document.getElementById('imgPreview').innerHTML = p.img
-      ? `<div class="img-prev"><img src="${p.img}"><button class="rm" onclick="removeImg()">✕</button></div>`
-      : '';
-  }, 50);
+    document.getElementById('formTitle').textContent='EDITAR PRODUCTO';document.getElementById('editId').value=p.id;document.getElementById('pName').value=p.name;
+    updateCatSelect();document.getElementById('pCat').value=p.cat;document.getElementById('pDesc').value=p.desc||'';document.getElementById('pPrice').value=p.price||'';
+    document.getElementById('pBadge').value=p.badge||'';document.getElementById('pDiscount').value=p.discount||'';document.getElementById('pImgUrl').value=p.img||'';
+    tempImg=p.img?{url:p.img}:null;document.getElementById('imgPreview').innerHTML=p.img?`<div class="img-prev"><img src="${p.img}"><button class="rm" onclick="removeImg()">✕</button></div>`:'';
+    previewDiscount();
+  },50);
 }
-
-async function deleteProduct(id) {
-  if (!confirm('¿Eliminar este producto?')) return;
-  DB.products = DB.products.filter(p=>p.id!=id);
-  saveDB();
-  await pushToGithub();
-  renderProductsTable();
-  renderDashboard();
-  showToast('🗑 Producto eliminado');
-}
-
-function clearForm() {
-  document.getElementById('formTitle').textContent = 'AGREGAR PRODUCTO';
-  document.getElementById('editId').value = '';
+async function deleteProduct(id){if(!confirm('¿Eliminar este producto?'))return;DB.products=DB.products.filter(p=>p.id!=id);saveDB();await pushToGithub();renderProductsTable();renderDashboard();showToast('🗑 Eliminado');}
+function clearForm(){
+  document.getElementById('formTitle').textContent='AGREGAR PRODUCTO';document.getElementById('editId').value='';
   ['pName','pDesc','pPrice','pImgUrl'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('pBadge').value = '';
-  document.getElementById('pDiscount').value = '';
-  document.getElementById('discPreview').textContent = '';
-  document.getElementById('pImgFile').value = '';
-  document.getElementById('imgPreview').innerHTML = '';
-  updateCatSelect();
-  tempImg = null;
+  document.getElementById('pBadge').value='';document.getElementById('pDiscount').value='';document.getElementById('discPreview').textContent='';
+  document.getElementById('pImgFile').value='';document.getElementById('imgPreview').innerHTML='';updateCatSelect();tempImg=null;
+}
+function previewDiscount(){
+  const price=document.getElementById('pPrice').value.trim(),disc=parseFloat(document.getElementById('pDiscount').value)||0,el=document.getElementById('discPreview');
+  if(!disc||disc<=0||!price){el.textContent='';return;}
+  const clean=price.replace(/\./g,'').replace(/,/g,'.');const m=clean.match(/\d+(\.\d+)?/);if(!m){el.textContent='';return;}
+  const num=parseFloat(m[0]),result=Math.round(num*(1-disc/100));
+  const suffix=price.replace(/[\d.,\s]/g,'').trim();
+  let fmt;if(price.match(/\d{1,3}\.\d{3}/)){fmt=result.toLocaleString('de-DE')+(suffix?' '+suffix:'');}else{fmt=result+(suffix?' '+suffix:'');}
+  el.innerHTML=`⚡ Precio final: <strong>${fmt}</strong> (antes ${price})`;
 }
 
-function previewDiscount() {
-  const price = document.getElementById('pPrice').value.trim();
-  const disc = parseFloat(document.getElementById('pDiscount').value) || 0;
-  const el = document.getElementById('discPreview');
-  if (!disc || disc <= 0 || !price) { el.textContent = ''; return; }
-  // Quick calc
-  const clean = price.replace(/\./g,'').replace(/,/g,'.');
-  const m = clean.match(/\d+(\.\d+)?/);
-  if (!m) { el.textContent = ''; return; }
-  const num = parseFloat(m[0]);
-  const result = Math.round(num * (1 - disc/100));
-  const suffix = price.replace(/[\d.,\s]/g,'').trim();
-  let formatted;
-  if (price.match(/\d{1,3}\.\d{3}/)) {
-    formatted = result.toLocaleString('de-DE') + (suffix ? ' ' + suffix : '');
-  } else {
-    formatted = result + (suffix ? ' ' + suffix : '');
-  }
-  el.innerHTML = `⚡ Precio con descuento: <strong>${formatted}</strong> (antes: ${price})`;
-}
-
-// ═══════════════════════════════════════════════
-// SERVICES
-// ═══════════════════════════════════════════════
-function renderSvcAdmin() {
-  document.getElementById('svcAdminList').innerHTML = DB.services.map(s=>`
+// STREAMING
+function renderStreamAdmin(){
+  document.getElementById('streamAdminList').innerHTML=(DB.streaming||[]).map(s=>`
     <div class="list-item">
-      <div class="list-item-left">
-        <div class="list-item-icon">${s.icon}</div>
-        <div>
-          <div class="list-item-name">${s.name}</div>
-          <div class="list-item-desc">${s.desc}</div>
-        </div>
-      </div>
-      <button class="btn-sm del" onclick="deleteSvc(${s.id})">🗑</button>
+      <div class="li-left"><div class="li-icon">${s.icon}</div><div><div class="li-name">${s.name}</div><div class="li-desc">${s.price}/mes — ${s.desc}</div></div></div>
+      <div style="display:flex;gap:.4rem"><button class="btn-sm" onclick="editStreaming(${s.id})">✏ Editar</button><button class="btn-sm del" onclick="deleteStreaming(${s.id})">🗑</button></div>
     </div>`).join('');
 }
-
-async function addService() {
-  const name = document.getElementById('sName').value.trim();
-  const icon = document.getElementById('sIcon').value.trim() || '⚡';
-  const desc = document.getElementById('sDesc').value.trim();
-  if (!name) { showToast('Ingresá el nombre del servicio', true); return; }
-  DB.services.push({id:Date.now(),icon,name,desc});
-  saveDB();
-  await pushToGithub();
-  renderSvcAdmin();
-  document.getElementById('sName').value='';
-  document.getElementById('sIcon').value='';
-  document.getElementById('sDesc').value='';
+async function addStreaming(){
+  const name=document.getElementById('stName').value.trim(),icon=document.getElementById('stIcon').value.trim()||'🎬',price=document.getElementById('stPrice').value.trim(),desc=document.getElementById('stDesc').value.trim();
+  if(!name){showToast('Ingresá el nombre',true);return;}
+  if(!DB.streaming)DB.streaming=[];
+  DB.streaming.push({id:Date.now(),name,icon,price,desc,combo:true});
+  saveDB();await pushToGithub();renderStreamAdmin();
+  ['stName','stIcon','stPrice','stDesc'].forEach(id=>document.getElementById(id).value='');
   showToast('✅ Servicio agregado');
 }
-
-async function deleteSvc(id) {
-  DB.services = DB.services.filter(s=>s.id!=id);
-  saveDB();
-  await pushToGithub();
-  renderSvcAdmin();
-  showToast('🗑 Servicio eliminado');
+function editStreaming(id){
+  const s=(DB.streaming||[]).find(x=>x.id==id);if(!s)return;
+  document.getElementById('stName').value=s.name;document.getElementById('stIcon').value=s.icon;document.getElementById('stPrice').value=s.price;document.getElementById('stDesc').value=s.desc||'';
+  deleteStreaming(id,false);
+}
+async function deleteStreaming(id,notify=true){
+  DB.streaming=(DB.streaming||[]).filter(s=>s.id!=id);saveDB();if(notify){await pushToGithub();renderStreamAdmin();showToast('🗑 Eliminado');}
 }
 
-// ═══════════════════════════════════════════════
+// SERVICES
+function renderSvcAdmin(){
+  document.getElementById('svcAdminList').innerHTML=(DB.services||[]).map(s=>`
+    <div class="list-item"><div class="li-left"><div class="li-icon">${s.icon}</div><div><div class="li-name">${s.name}</div><div class="li-desc">${s.desc}</div></div></div>
+    <button class="btn-sm del" onclick="deleteSvc(${s.id})">🗑</button></div>`).join('');
+}
+async function addService(){
+  const name=document.getElementById('sName').value.trim(),icon=document.getElementById('sIcon').value.trim()||'⚡',desc=document.getElementById('sDesc').value.trim();
+  if(!name){showToast('Ingresá el nombre',true);return;}
+  DB.services.push({id:Date.now(),icon,name,desc});saveDB();await pushToGithub();renderSvcAdmin();
+  ['sName','sIcon','sDesc'].forEach(id=>document.getElementById(id).value='');showToast('✅ Agregado');
+}
+async function deleteSvc(id){DB.services=DB.services.filter(s=>s.id!=id);saveDB();await pushToGithub();renderSvcAdmin();showToast('🗑 Eliminado');}
+
 // SETTINGS
-// ═══════════════════════════════════════════════
-function loadSettings() {
-  const c = DB.config||{};
-  document.getElementById('cfgWa').value = c.wa||'';
-  document.getElementById('cfgCity').value = c.city||'';
-  document.getElementById('cfgEmail').value = c.email||'';
-  document.getElementById('cfgAddr').value = c.address||'';
-  document.getElementById('cfgHours').value = c.hours||'';
-  document.getElementById('cfgHeroDesc').value = c.heroDesc||'';
-  const gh = getGhConfig();
-  document.getElementById('cfgGhToken2').value = gh.token||'';
-  document.getElementById('cfgGhRepo2').value = gh.repo||'';
-  document.getElementById('cfgGhBranch').value = gh.branch||'main';
+function loadSettings(){
+  const c=DB.config||{};
+  document.getElementById('cfgWa').value=c.wa||'';document.getElementById('cfgCity').value=c.city||'';document.getElementById('cfgEmail').value=c.email||'';
+  document.getElementById('cfgAddr').value=c.address||'';document.getElementById('cfgHours').value=c.hours||'';document.getElementById('cfgHeroDesc').value=c.heroDesc||'';
+  const gh=getGh();document.getElementById('cfgGhToken2').value=gh.token||'';document.getElementById('cfgGhRepo2').value=gh.repo||'';document.getElementById('cfgGhBranch').value=gh.branch||'main';
   renderCatAdmin();
 }
-
-async function saveSettings() {
-  DB.config = {
-    wa: document.getElementById('cfgWa').value.trim(),
-    city: document.getElementById('cfgCity').value.trim(),
-    email: document.getElementById('cfgEmail').value.trim(),
-    address: document.getElementById('cfgAddr').value.trim(),
-    hours: document.getElementById('cfgHours').value.trim(),
-    heroDesc: document.getElementById('cfgHeroDesc').value.trim(),
-  };
-  saveDB();
-  await pushToGithub();
-  showToast('✅ Configuración guardada y sitio actualizado');
+async function saveSettings(){
+  DB.config={wa:document.getElementById('cfgWa').value.trim(),city:document.getElementById('cfgCity').value.trim(),email:document.getElementById('cfgEmail').value.trim(),address:document.getElementById('cfgAddr').value.trim(),hours:document.getElementById('cfgHours').value.trim(),heroDesc:document.getElementById('cfgHeroDesc').value.trim()};
+  saveDB();await pushToGithub();showToast('✅ Configuración guardada');
+}
+function saveGhConfig(){const token=document.getElementById('cfgGhToken').value.trim(),repo=document.getElementById('cfgGhRepo').value.trim();if(!token||!repo){showToast('Ingresá token y repo',true);return;}saveGhCfg({token,repo,branch:'main'});updateGhStatus();document.getElementById('ghSetupPanel').style.display='none';showToast('✅ GitHub conectado');}
+function saveGhConfig2(){const token=document.getElementById('cfgGhToken2').value.trim(),repo=document.getElementById('cfgGhRepo2').value.trim(),branch=document.getElementById('cfgGhBranch').value.trim()||'main';if(!token||!repo){showToast('Falta token o repo',true);return;}saveGhCfg({token,repo,branch});updateGhStatus();showToast('✅ Guardado');}
+async function testGhConnection(){
+  const gh=getGh(),el=document.getElementById('ghTestResult');if(!gh.token||!gh.repo){el.textContent='⚠ Configurá token y repo';return;}el.textContent='🔄 Probando...';
+  try{const res=await fetch(`https://api.github.com/repos/${gh.repo}`,{headers:{Authorization:`token ${gh.token}`,Accept:'application/vnd.github.v3+json'}});
+  if(res.ok){const d=await res.json();el.style.color='#4caf50';el.textContent=`✓ Conectado: ${d.full_name}`;}else{el.style.color='#ff5252';el.textContent=`✗ Error ${res.status}`;}}
+  catch(e){el.style.color='#ff5252';el.textContent='✗ '+e.message;}
+}
+function changePassword(){
+  const np=document.getElementById('cfgNewPass').value,cp=document.getElementById('cfgConfPass').value,err=document.getElementById('passErr');
+  if(!np){err.textContent='Ingresá contraseña';return;}if(np.length<6){err.textContent='Mínimo 6 caracteres';return;}if(np!==cp){err.textContent='No coinciden';return;}
+  err.textContent='';DB.password=np;saveDB();document.getElementById('cfgNewPass').value='';document.getElementById('cfgConfPass').value='';showToast('✅ Contraseña cambiada');
+}
+function renderCatAdmin(){
+  document.getElementById('catAdminList').innerHTML=DB.categories.map(c=>`
+    <div class="list-item"><div class="li-left"><div class="li-icon">${c.icon}</div><div><div class="li-name">${c.name}</div><div class="li-desc">${DB.products.filter(p=>p.cat===c.name).length} productos</div></div></div>
+    <button class="btn-sm del" onclick="deleteCat(${c.id})">🗑</button></div>`).join('');
+}
+function addCategory(){
+  const name=document.getElementById('newCatName').value.trim(),icon=document.getElementById('newCatIcon').value.trim()||'📦';
+  if(!name){showToast('Ingresá nombre',true);return;}if(DB.categories.find(c=>c.name.toLowerCase()===name.toLowerCase())){showToast('Ya existe',true);return;}
+  DB.categories.push({id:Date.now(),name,icon});saveDB();renderCatAdmin();document.getElementById('newCatName').value='';document.getElementById('newCatIcon').value='';showToast('✅ Categoría agregada');
+}
+function deleteCat(id){
+  const cat=DB.categories.find(c=>c.id==id);if(!cat)return;
+  if(DB.products.some(p=>p.cat===cat.name)){showToast('Tiene productos asignados',true);return;}
+  DB.categories=DB.categories.filter(c=>c.id!=id);saveDB();renderCatAdmin();showToast('🗑 Eliminada');
+}
+function switchSettingsTab(id,btn){
+  ['tabGeneral','tabGithub','tabCats','tabSecurity'].forEach(t=>document.getElementById(t).style.display=t===id?'block':'none');
+  document.querySelectorAll('#pageSettings .tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');
+  if(id==='tabCats')renderCatAdmin();
 }
 
-function saveGhConfig() {
-  const token = document.getElementById('cfgGhToken').value.trim();
-  const repo = document.getElementById('cfgGhRepo').value.trim();
-  if (!token || !repo) { showToast('Ingresá token y repositorio', true); return; }
-  saveGhCfg({token, repo, branch:'main'});
-  updateGhStatus();
-  document.getElementById('ghSetupPanel').style.display = 'none';
-  showToast('✅ GitHub conectado');
-}
-
-function saveGhConfig2() {
-  const token = document.getElementById('cfgGhToken2').value.trim();
-  const repo = document.getElementById('cfgGhRepo2').value.trim();
-  const branch = document.getElementById('cfgGhBranch').value.trim() || 'main';
-  if (!token || !repo) { showToast('Ingresá token y repositorio', true); return; }
-  saveGhCfg({token, repo, branch});
-  updateGhStatus();
-  showToast('✅ Conexión GitHub guardada');
-}
-
-async function testGhConnection() {
-  const gh = getGhConfig();
-  const el = document.getElementById('ghTestResult');
-  if (!gh.token || !gh.repo) { el.textContent = '⚠ Configurá el token y repositorio primero'; return; }
-  el.textContent = '🔄 Probando conexión...';
-  try {
-    const res = await fetch(`https://api.github.com/repos/${gh.repo}`, {
-      headers: { Authorization: `token ${gh.token}`, Accept: 'application/vnd.github.v3+json' }
-    });
-    if (res.ok) { const d=await res.json(); el.style.color='#4caf50'; el.textContent=`✓ Conectado: ${d.full_name} (${d.visibility})`; }
-    else { el.style.color='#ff5252'; el.textContent=`✗ Error ${res.status}: token inválido o repositorio no encontrado`; }
-  } catch(e) { el.style.color='#ff5252'; el.textContent='✗ Error de red: '+e.message; }
-}
-
-function changePassword() {
-  const np = document.getElementById('cfgNewPass').value;
-  const cp = document.getElementById('cfgConfPass').value;
-  const err = document.getElementById('passErr');
-  if (!np) { err.textContent='Ingresá la nueva contraseña'; return; }
-  if (np.length < 6) { err.textContent='Mínimo 6 caracteres'; return; }
-  if (np !== cp) { err.textContent='Las contraseñas no coinciden'; return; }
-  err.textContent = '';
-  DB.password = np;
-  saveDB();
-  document.getElementById('cfgNewPass').value = '';
-  document.getElementById('cfgConfPass').value = '';
-  showToast('✅ Contraseña cambiada');
-}
-
-// CATEGORIES
-function renderCatAdmin() {
-  document.getElementById('catAdminList').innerHTML = DB.categories.map(c=>`
-    <div class="list-item">
-      <div class="list-item-left">
-        <div class="list-item-icon">${c.icon}</div>
-        <div>
-          <div class="list-item-name">${c.name}</div>
-          <div class="list-item-desc">${DB.products.filter(p=>p.cat===c.name).length} productos</div>
-        </div>
-      </div>
-      <button class="btn-sm del" onclick="deleteCat(${c.id})">🗑</button>
-    </div>`).join('');
-}
-
-function addCategory() {
-  const name = document.getElementById('newCatName').value.trim();
-  const icon = document.getElementById('newCatIcon').value.trim() || '📦';
-  if (!name) { showToast('Ingresá el nombre', true); return; }
-  if (DB.categories.find(c=>c.name.toLowerCase()===name.toLowerCase())) { showToast('Categoría ya existe', true); return; }
-  DB.categories.push({id:Date.now(),name,icon});
-  saveDB();
-  renderCatAdmin();
-  document.getElementById('newCatName').value='';
-  document.getElementById('newCatIcon').value='';
-  showToast('✅ Categoría agregada');
-}
-
-function deleteCat(id) {
-  const cat = DB.categories.find(c=>c.id==id);
-  if (!cat) return;
-  if (DB.products.some(p=>p.cat===cat.name)) { showToast('No se puede eliminar: tiene productos asignados', true); return; }
-  DB.categories = DB.categories.filter(c=>c.id!=id);
-  saveDB();
-  renderCatAdmin();
-  showToast('🗑 Categoría eliminada');
-}
-
-function switchSettingsTab(id) {
-  ['tabGeneral','tabGithub','tabCategories','tabSecurity'].forEach(t=>{
-    document.getElementById(t).style.display = t===id?'block':'none';
-  });
-  document.querySelectorAll('#pageSettings .tab').forEach((t,i)=>{
-    t.classList.toggle('active',['tabGeneral','tabGithub','tabCategories','tabSecurity'][i]===id);
-  });
-  if (id==='tabCategories') renderCatAdmin();
-}
-
-// ═══════════════════════════════════════════════
 // GITHUB PUSH
-// ═══════════════════════════════════════════════
-async function pushToGithub() {
-  const gh = getGhConfig();
-  if (!gh.token || !gh.repo) {
-    showToast('💾 Guardado local (configurá GitHub para sync automático)', false);
-    return;
-  }
-  const branch = gh.branch || 'main';
-  const path = 'productos.json';
-  const content = buildJsonContent();
-
-  try {
-    showToast('☁ Sincronizando con GitHub...', false);
-    // Get current file SHA
-    const getRes = await fetch(`https://api.github.com/repos/${gh.repo}/contents/${path}?ref=${branch}`, {
-      headers: { Authorization: `token ${gh.token}`, Accept: 'application/vnd.github.v3+json' }
-    });
-    let sha = null;
-    if (getRes.ok) { const d=await getRes.json(); sha=d.sha; }
-
-    // Push update
-    const body = {
-      message: `⚡ Update products — ${new Date().toLocaleString('es-PY')}`,
-      content: btoa(unescape(encodeURIComponent(content))),
-      branch,
-    };
-    if (sha) body.sha = sha;
-
-    const putRes = await fetch(`https://api.github.com/repos/${gh.repo}/contents/${path}`, {
-      method: 'PUT',
-      headers: { Authorization: `token ${gh.token}`, Accept: 'application/vnd.github.v3+json', 'Content-Type':'application/json' },
-      body: JSON.stringify(body)
-    });
-
-    if (putRes.ok) {
-      showToast('✅ Sitio actualizado en Netlify (~30s)');
-    } else {
-      const err = await putRes.json();
-      throw new Error(err.message || putRes.status);
-    }
-  } catch(e) {
-    showToast('⚠ GitHub error: '+e.message+' (guardado local OK)', true);
-    console.error('GitHub push error:', e);
-  }
+async function pushToGithub(){
+  const gh=getGh();if(!gh.token||!gh.repo){showToast('💾 Guardado local (configurá GitHub para sync)',false);return;}
+  const branch=gh.branch||'main',path='productos.json';
+  const content=JSON.stringify({products:DB.products,categories:DB.categories,streaming:DB.streaming||[],services:DB.services,config:DB.config},null,2);
+  try{
+    showToast('☁ Sincronizando con GitHub...',false);
+    const getRes=await fetch(`https://api.github.com/repos/${gh.repo}/contents/${path}?ref=${branch}`,{headers:{Authorization:`token ${gh.token}`,Accept:'application/vnd.github.v3+json'}});
+    let sha=null;if(getRes.ok){const d=await getRes.json();sha=d.sha;}
+    const body={message:`⚡ Update — ${new Date().toLocaleString('es-PY')}`,content:btoa(unescape(encodeURIComponent(content))),branch};if(sha)body.sha=sha;
+    const putRes=await fetch(`https://api.github.com/repos/${gh.repo}/contents/${path}`,{method:'PUT',headers:{Authorization:`token ${gh.token}`,Accept:'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(putRes.ok){showToast('✅ Sitio actualizado en Netlify (~30s)');}else{const err=await putRes.json();throw new Error(err.message||putRes.status);}
+  }catch(e){showToast('⚠ GitHub error: '+e.message,true);console.error(e);}
 }
-
-function buildJsonContent() {
-  const payload = {
-    products: DB.products,
-    categories: DB.categories,
-    services: DB.services,
-    config: DB.config
-  };
-  return JSON.stringify(payload, null, 2);
+function updateGhStatus(){
+  const gh=getGh();const dot=document.getElementById('ghDot');const lbl=document.getElementById('ghStatusLabel');
+  if(gh.token&&gh.repo){dot.style.background='#4caf50';lbl.style.color='#4caf50';lbl.textContent='GitHub ✓';}
+  else{dot.style.background='#ff5252';lbl.style.color='rgba(255,255,255,.4)';lbl.textContent='GitHub — Sin config';}
 }
-
-function updateGhStatus() {
-  const gh = getGhConfig();
-  const dot = document.getElementById('ghDot');
-  const label = document.getElementById('ghStatusLabel');
-  if (gh.token && gh.repo) {
-    dot.classList.remove('off'); dot.style.background='#4caf50';
-    label.textContent = 'GitHub ✓';
-    label.style.color = '#4caf50';
-  } else {
-    dot.classList.add('off'); dot.style.background='#ff5252';
-    label.textContent = 'GitHub — No configurado';
-    label.style.color = 'rgba(255,255,255,.4)';
-  }
-}
-
-// ═══════════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════════
-function getCatIcon(cat) {
-  return DB.categories.find(c=>c.name===cat)?.icon || '📦';
-}
-function showToast(msg, err=false) {
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.className='toast'+(err?' err':'')+' show';
-  setTimeout(()=>t.className='toast',3500);
-}
+function showToast(msg,err=false){const t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(err?' err':'')+' show';clearTimeout(t._t);t._t=setTimeout(()=>t.className='toast',3500);}
 </script>
 </body>
 </html>

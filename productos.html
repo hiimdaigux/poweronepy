@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Productos — Power One Py</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+.page-hero{padding:120px 5% 60px;background:var(--bm);border-bottom:1px solid rgba(var(--accent-rgb),.1);position:relative;overflow:hidden}
+.page-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 80% 50%,rgba(var(--accent-rgb),.06) 0%,transparent 60%)}
+.page-hero-inner{max-width:1300px;margin:0 auto;position:relative;z-index:2}
+.page-breadcrumb{font-family:'Barlow Condensed',sans-serif;font-size:.8rem;color:rgba(255,255,255,.35);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1rem}
+.page-breadcrumb a{color:var(--accent);text-decoration:none}
+.page-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.8rem,6vw,5rem);color:var(--white);line-height:1;letter-spacing:.03em}
+.page-title .acc{color:var(--accent)}
+.page-subtitle{font-size:1rem;color:rgba(255,255,255,.45);margin-top:.7rem;line-height:1.6;max-width:480px}
+
+/* Category sidebar pills */
+.products-layout{display:grid;grid-template-columns:220px 1fr;gap:2.5rem;max-width:1300px;margin:0 auto;padding:2.5rem 5%}
+.sidebar{position:sticky;top:84px;align-self:start}
+.sidebar-title{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.2em;margin-bottom:1rem;padding-bottom:.7rem;border-bottom:1px solid rgba(255,255,255,.06)}
+.cat-pill{display:flex;align-items:center;justify-content:space-between;padding:.7rem 1rem;cursor:pointer;color:rgba(255,255,255,.5);font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.9rem;text-transform:uppercase;letter-spacing:.06em;transition:all .2s;border-left:3px solid transparent;margin-bottom:2px;text-decoration:none}
+.cat-pill:hover{color:var(--white);background:rgba(255,255,255,.03);border-left-color:rgba(var(--accent-rgb),.4)}
+.cat-pill.active{color:var(--accent);background:rgba(var(--accent-rgb),.06);border-left-color:var(--accent)}
+.cat-pill-count{font-size:.72rem;background:rgba(255,255,255,.08);color:rgba(255,255,255,.4);padding:2px 7px;border-radius:20px}
+.cat-pill.active .cat-pill-count{background:rgba(var(--accent-rgb),.15);color:var(--accent)}
+
+/* Main content */
+.products-main{}
+.products-toolbar{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.products-toolbar .search-wrap{flex:1;min-width:200px;max-width:360px}
+.active-filter-label{font-family:'Barlow Condensed',sans-serif;font-size:.85rem;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.1em}
+.active-filter-label span{color:var(--accent)}
+.result-count{font-family:'Barlow Condensed',sans-serif;font-size:.8rem;color:rgba(255,255,255,.3);margin-left:auto;letter-spacing:.06em;text-transform:uppercase}
+
+@media(max-width:900px){.products-layout{grid-template-columns:1fr}.sidebar{position:static}.sidebar-pills{display:flex;flex-wrap:wrap;gap:.4rem}.cat-pill{padding:.5rem .9rem;border-left:none;border-bottom:2px solid transparent;margin-bottom:0}.cat-pill.active{border-left:none;border-bottom-color:var(--accent)}}
+</style>
+</head>
+<body>
+<div id="loader"><div><div class="loader-logo">PRODUCTOS</div><div class="loader-bar"><div class="loader-fill"></div></div></div></div>
+<nav>
+  <a class="nav-logo" href="index.html">POWER <span>ONE</span> PY</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html" onclick="closeMenu()">Inicio</a></li>
+    <li><a href="productos.html" class="active" onclick="closeMenu()">Productos</a></li>
+    <li><a href="streaming.html" onclick="closeMenu()">Streaming</a></li>
+    <li><a href="index.html#contacto" onclick="closeMenu()">Contacto</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="theme-switcher">
+      <button class="theme-btn" data-theme="yellow" onclick="applyTheme('yellow')" title="Tema Amarillo"></button>
+      <button class="theme-btn" data-theme="orange" onclick="applyTheme('orange')" title="Tema Naranja"></button>
+    </div>
+    <button class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-breadcrumb"><a href="index.html">Inicio</a> / Productos</div>
+    <h1 class="page-title">TODOS LOS <span class="acc">PRODUCTOS</span></h1>
+    <p class="page-subtitle">Encontrá lo que buscás al mejor precio del mercado. Hacé clic en cualquier producto para ver más detalles.</p>
+  </div>
+</div>
+
+<div class="products-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-title">Categorías</div>
+    <div class="sidebar-pills" id="sidebarPills"></div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="products-main">
+    <div class="products-toolbar">
+      <div class="search-wrap">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="searchInput" placeholder="Buscar producto..." oninput="onSearch()">
+      </div>
+      <div class="active-filter-label">Categoría: <span id="activeFilterLabel">Todos</span></div>
+      <div class="result-count" id="resultCount"></div>
+    </div>
+    <div class="prod-grid" id="prodGrid">
+      <div class="prod-loading"><div class="spinner"></div></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-inner">
+    <div><div class="foot-logo">POWER <span>ONE</span> PY</div><p class="foot-tagline">Electrónica, Informática & Car Audio en Paraguay.</p></div>
+    <div><div class="foot-col-title">Navegación</div><ul class="foot-links"><li><a href="index.html">Inicio</a></li><li><a href="productos.html">Productos</a></li><li><a href="streaming.html">Streaming</a></li><li><a href="index.html#contacto">Contacto</a></li></ul></div>
+    <div><div class="foot-col-title">One Store Py</div><ul class="foot-links"><li><a href="#">Garantía</a></li><li><a href="#">Envíos</a></li><li><a href="#">Soporte</a></li></ul></div>
+  </div>
+  <div class="foot-bottom"><span id="footYear"></span><span>One Store Py</span></div>
+</footer>
+
+<a class="wa-float" id="waFloat" href="#" target="_blank">💬</a>
+<div class="toast" id="toast"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-close-bar"><button onclick="closeModal()">✕</button></div>
+    <div class="modal-main"><div class="modal-gallery" id="mGallery"></div>
+      <div class="modal-info"><div class="modal-cat" id="mCat"></div><div class="modal-name" id="mName"></div><div class="modal-desc" id="mDesc"></div><hr class="modal-hr"><div id="mPrice"></div><hr class="modal-hr"><div class="modal-ctas" id="mCtas"></div></div>
+    </div>
+    <div class="modal-similar" id="mSimilar"><div class="similar-label">Productos similares</div>
+      <div class="slider-outer"><button class="sldr-btn prev" id="sPrev" onclick="sliderMove(-1)">‹</button><div class="slider-overflow"><div class="slider-track" id="sTrack"></div></div><button class="sldr-btn next" id="sNext" onclick="sliderMove(1)">›</button></div>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+let DB=null, activeFilter='Todos', sliderPos=0;
+
+window.addEventListener('load', async () => {
+  initTheme();
+  setTimeout(()=>document.getElementById('loader').classList.add('hide'),1000);
+  document.getElementById('footYear').textContent=`© ${new Date().getFullYear()} Power One Py.`;
+  DB = await loadDB();
+  document.getElementById('waFloat').href = `https://wa.me/${DB.config?.wa||'595981570126'}`;
+  // Read hash for initial filter
+  const hash = decodeURIComponent(window.location.hash.replace('#',''));
+  if (hash) activeFilter = hash;
+  renderSidebar();
+  renderProducts();
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+});
+
+// Update filter when hash changes
+window.addEventListener('hashchange', () => {
+  const hash = decodeURIComponent(window.location.hash.replace('#',''));
+  activeFilter = hash || 'Todos';
+  renderSidebar();
+  renderProducts();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+function renderSidebar() {
+  const counts = {};
+  (DB.products||[]).forEach(p=>{counts[p.cat]=(counts[p.cat]||0)+1;});
+  const all = [{name:'Todos', count:(DB.products||[]).length}, ...(DB.categories||[]).map(c=>({name:c.name,count:counts[c.name]||0}))];
+  document.getElementById('sidebarPills').innerHTML = all.map(c => `
+    <a class="cat-pill ${activeFilter===c.name?'active':''}" href="#${encodeURIComponent(c.name==='Todos'?'':''+c.name)}" onclick="setFilter('${c.name}',event)">
+      ${c.name}
+      <span class="cat-pill-count">${c.count}</span>
+    </a>`).join('');
+}
+
+function setFilter(cat, e) {
+  e.preventDefault();
+  activeFilter = cat;
+  const newHash = cat === 'Todos' ? '' : '#' + encodeURIComponent(cat);
+  history.pushState(null, '', window.location.pathname + newHash);
+  renderSidebar();
+  renderProducts();
+}
+
+function onSearch() { renderProducts(); }
+
+function renderProducts() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  let list = DB.products || [];
+  if (activeFilter !== 'Todos') list = list.filter(p=>p.cat===activeFilter);
+  if (q) list = list.filter(p=>(p.name+' '+(p.desc||'')).toLowerCase().includes(q));
+
+  document.getElementById('activeFilterLabel').textContent = activeFilter;
+  document.getElementById('resultCount').textContent = `${list.length} resultado${list.length!==1?'s':''}`;
+
+  if (!list.length) {
+    document.getElementById('prodGrid').innerHTML='<div class="prod-empty">😕 No se encontraron productos</div>';
+    return;
+  }
+  document.getElementById('prodGrid').innerHTML = list.map((p,i)=>prodCard(p,i)).join('');
+}
+
+function prodCard(p,i) {
+  const pc=calcPrice(p);
+  return`<div class="prod-card" style="animation-delay:${i*.045}s" onclick="openModal(${p.id})">
+    <div class="prod-img-wrap">${p.img?`<img src="${p.img}" alt="${p.name}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`:``}<div class="no-img" style="${p.img?'display:none':'display:flex'}">📦</div>${pc.hasDisc?`<div class="prod-badge red">-${p.discount}%</div>`:p.badge?`<div class="prod-badge yellow">${p.badge}</div>`:''}</div>
+    <div class="prod-info"><div class="prod-cat">${p.cat}</div><div class="prod-name">${p.name}</div><div class="prod-desc-text">${p.desc||'Consultá disponibilidad'}</div>
+      <div class="prod-footer"><div class="price-block">${pc.hasDisc?`<div class="price-original-text">${p.price}</div>`:''}<div class="price-final${pc.hasDisc?' red':''}"><span class="price-from-sm">desde</span>${pc.display}${pc.hasDisc?`<span class="disc-tag">-${p.discount}%</span>`:''}</div></div>
+      <a class="btn-wa" href="${waLink(p,DB)}" target="_blank" onclick="event.stopPropagation()">💬</a></div></div></div>`;
+}
+
+function openModal(id) {
+  const p=DB.products.find(x=>x.id==id);if(!p)return;
+  const pc=calcPrice(p);
+  document.getElementById('mGallery').innerHTML=(p.img?`<img src="${p.img}" alt="${p.name}">`:`<div class="no-img-lg">📦</div>`)+(pc.hasDisc?`<div class="modal-gallery-badge red">-${p.discount}% OFF</div>`:p.badge?`<div class="modal-gallery-badge yellow">${p.badge}</div>`:'');
+  document.getElementById('mCat').textContent=p.cat;
+  document.getElementById('mName').textContent=p.name;
+  document.getElementById('mDesc').textContent=p.desc||'Sin descripción disponible.';
+  document.getElementById('mPrice').innerHTML=pc.hasDisc?`<div class="modal-price-wrap"><div class="modal-price-old">${p.price}</div><div class="modal-price-new red">${pc.display}</div><div class="modal-disc-chip">-${p.discount}% OFF</div></div>`:`<div class="modal-price-wrap"><div class="modal-price-new">${p.price||'Consultar precio'}</div></div>`;
+  document.getElementById('mCtas').innerHTML=`<a class="btn-modal-wa" href="${waLink(p,DB)}" target="_blank">💬 Consultar por WhatsApp</a><button class="btn-modal-back" onclick="closeModal()">← Seguir viendo</button>`;
+  renderSimilar(p);
+  document.getElementById('modalOverlay').classList.add('open');document.body.style.overflow='hidden';document.querySelector('.modal-box').scrollTop=0;
+}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');document.body.style.overflow='';}
+function renderSimilar(cur) {
+  const sim=(DB.products||[]).filter(p=>p.id!==cur.id&&p.cat===cur.cat);
+  const oth=(DB.products||[]).filter(p=>p.id!==cur.id&&p.cat!==cur.cat);
+  const list=[...sim,...oth].slice(0,8);
+  const sec=document.getElementById('mSimilar');if(!list.length){sec.style.display='none';return;}sec.style.display='block';
+  document.getElementById('sTrack').innerHTML=list.map(p=>{const pc=calcPrice(p);return`<div class="slide-card" onclick="openModal(${p.id})"><div class="slide-img">${p.img?`<img src="${p.img}" loading="lazy">`:`<div class="slide-empty">📦</div>`}</div><div class="slide-info"><div class="slide-name">${p.name}</div><div class="slide-price${pc.hasDisc?' red':''}">${pc.display||p.price||'Consultar'}</div></div></div>`;}).join('');
+  sliderPos=0;document.getElementById('sTrack').style.transform='translateX(0)';document.getElementById('sPrev').disabled=true;document.getElementById('sNext').disabled=list.length<=4;
+}
+function sliderMove(dir) {
+  const track=document.getElementById('sTrack');const cards=track.querySelectorAll('.slide-card');if(!cards.length)return;
+  const outer=track.parentElement;const cardW=cards[0].offsetWidth+12;const visible=Math.max(1,Math.floor(outer.offsetWidth/cardW));const maxPos=Math.max(0,cards.length-visible);
+  sliderPos=Math.max(0,Math.min(maxPos,sliderPos+dir));track.style.transform=`translateX(-${sliderPos*cardW}px)`;document.getElementById('sPrev').disabled=sliderPos===0;document.getElementById('sNext').disabled=sliderPos>=maxPos;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Streaming — One Store Py</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* PAGE HERO */
+.page-hero{padding:120px 5% 60px;background:var(--bm);border-bottom:1px solid rgba(var(--accent-rgb),.1);position:relative;overflow:hidden}
+.page-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(var(--accent-rgb),.07) 0%,transparent 60%)}
+.page-hero-inner{max-width:1200px;margin:0 auto;position:relative;z-index:2;display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:center}
+.page-breadcrumb{font-family:'Barlow Condensed',sans-serif;font-size:.8rem;color:rgba(255,255,255,.35);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.8rem}
+.page-breadcrumb a{color:var(--accent);text-decoration:none}
+.page-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.8rem,6vw,5rem);color:var(--white);line-height:1}
+.page-title .acc{color:var(--accent)}
+.page-subtitle{font-size:1rem;color:rgba(255,255,255,.45);margin-top:.6rem;line-height:1.65;max-width:460px}
+
+/* COMBO COUNTER BADGE */
+.combo-badge-wrap{text-align:center}
+.combo-badge{background:var(--accent);color:var(--on-accent);font-family:'Bebas Neue',sans-serif;font-size:4rem;width:100px;height:100px;border-radius:50%;display:flex;align-items:center;justify-content:center;letter-spacing:.02em;cursor:pointer;transition:all .3s;position:relative}
+.combo-badge:hover{transform:scale(1.06);filter:brightness(1.1)}
+.combo-badge-label{font-family:'Barlow Condensed',sans-serif;font-size:.75rem;font-weight:600;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.15em;margin-top:.5rem}
+
+/* TABS */
+.stream-tabs{display:flex;border-bottom:2px solid rgba(var(--accent-rgb),.12);max-width:1200px;margin:0 auto;padding:0 5%}
+.stab{background:none;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.35);padding:1.2rem 1.5rem;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s}
+.stab:hover{color:var(--white)}.stab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* STREAMING GRID */
+.stream-section{padding:3rem 5%;max-width:1200px;margin:0 auto}
+.stream-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.4rem}
+
+/* SERVICE CARD */
+.svc-card{background:var(--bm);border:1px solid rgba(255,255,255,.06);overflow:hidden;transition:all .3s;display:flex;flex-direction:column}
+.svc-card:hover{border-color:rgba(var(--accent-rgb),.25);transform:translateY(-4px);box-shadow:0 12px 35px rgba(0,0,0,.4)}
+.svc-card-top{padding:2rem;text-align:center;background:var(--bs);flex-shrink:0}
+.svc-card-icon{font-size:3.5rem;margin-bottom:.8rem;display:block}
+.svc-card-name{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--white);letter-spacing:.05em;margin-bottom:.3rem}
+.svc-card-desc{font-size:.85rem;color:rgba(255,255,255,.45);line-height:1.55;min-height:2.5em}
+.svc-card-bottom{padding:1.2rem 1.5rem;display:flex;flex-direction:column;gap:.8rem;flex:1;justify-content:flex-end}
+.svc-price{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--accent);line-height:1}
+.svc-price small{font-family:'Barlow',sans-serif;font-size:.75rem;color:rgba(255,255,255,.3);font-weight:400}
+.svc-actions{display:flex;gap:.6rem}
+.btn-add-combo{background:rgba(var(--accent-rgb),.12);border:1px solid rgba(var(--accent-rgb),.25);color:var(--accent);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;padding:9px 14px;flex:1;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px}
+.btn-add-combo:hover{background:rgba(var(--accent-rgb),.2);border-color:var(--accent)}
+.btn-add-combo.added{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.btn-consult-single{background:#25D366;color:#fff;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;padding:9px 14px;flex:1;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .2s;text-decoration:none}
+.btn-consult-single:hover{background:#1ebe59}
+
+/* ═══ COMBO PANEL ═══ */
+.combo-overlay{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.88);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:flex-end;opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s}
+.combo-overlay.open{opacity:1;visibility:visible}
+.combo-drawer{background:var(--bm);border-left:1px solid rgba(var(--accent-rgb),.15);width:100%;max-width:480px;height:100vh;overflow-y:auto;transform:translateX(100%);transition:transform .35s cubic-bezier(.25,.46,.45,.94);display:flex;flex-direction:column}
+.combo-overlay.open .combo-drawer{transform:translateX(0)}
+.combo-head{padding:1.5rem;background:var(--bs);border-bottom:1px solid rgba(var(--accent-rgb),.12);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:5}
+.combo-head h2{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--white);letter-spacing:.05em}
+.combo-head p{font-size:.82rem;color:rgba(255,255,255,.4);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;margin-top:.15rem}
+.combo-close{background:none;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.45);cursor:pointer;width:34px;height:34px;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.combo-close:hover{border-color:var(--accent);color:var(--accent)}
+.combo-body{flex:1;padding:1.5rem;overflow-y:auto}
+.combo-empty{text-align:center;padding:3rem 1rem;color:rgba(255,255,255,.25);font-family:'Barlow Condensed',sans-serif;font-size:1rem;letter-spacing:.1em;text-transform:uppercase}
+.combo-empty .empty-icon{font-size:3rem;margin-bottom:1rem;display:block;opacity:.4}
+.combo-item{display:flex;align-items:center;gap:1rem;padding:1rem;background:var(--bs);border:1px solid rgba(255,255,255,.05);margin-bottom:.6rem;transition:all .2s}
+.combo-item:hover{border-color:rgba(var(--accent-rgb),.15)}
+.combo-item-icon{font-size:2rem;flex-shrink:0;width:50px;text-align:center}
+.combo-item-info{flex:1;min-width:0}
+.combo-item-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;color:var(--white);text-transform:uppercase;letter-spacing:.05em}
+.combo-item-price{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--accent)}
+.combo-rm{background:none;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.3);cursor:pointer;width:28px;height:28px;font-size:.85rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.combo-rm:hover{border-color:#ff5252;color:#ff5252}
+.combo-footer{padding:1.5rem;border-top:1px solid rgba(var(--accent-rgb),.12);flex-shrink:0;background:var(--bs)}
+.combo-total-row{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:1rem}
+.combo-total-label{font-family:'Barlow Condensed',sans-serif;font-size:.85rem;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.1em}
+.combo-total-price{font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:var(--accent);line-height:1}
+.combo-discount-note{font-size:.78rem;color:rgba(255,255,255,.3);font-family:'Barlow Condensed',sans-serif;letter-spacing:.06em;margin-bottom:1.2rem}
+.combo-discount-note span{color:#4caf50}
+.btn-request-combo{width:100%;background:#25D366;color:#fff;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.1rem;letter-spacing:.1em;text-transform:uppercase;padding:16px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s}
+.btn-request-combo:hover{background:#1ebe59;transform:translateY(-2px);box-shadow:0 6px 20px rgba(37,211,102,.35)}
+.btn-request-combo:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-clear-combo{width:100%;background:none;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.35);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;padding:10px;margin-top:.6rem;transition:all .2s}
+.btn-clear-combo:hover{border-color:#ff5252;color:#ff5252}
+
+/* FLOATING COMBO BTN */
+.combo-float{position:fixed;bottom:100px;right:28px;z-index:900;background:var(--accent);color:var(--on-accent);border:none;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:.1em;padding:12px 18px;display:flex;align-items:center;gap:8px;transition:all .3s;box-shadow:0 4px 20px rgba(var(--accent-rgb),.3);clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))}
+.combo-float:hover{filter:brightness(1.1);transform:translateY(-2px)}
+.combo-float-count{background:var(--on-accent);color:var(--accent);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-family:'Barlow',sans-serif;font-weight:700}
+
+@media(max-width:600px){
+  .page-hero-inner{grid-template-columns:1fr}.combo-badge-wrap{display:none}
+  .combo-drawer{max-width:100%}
+  .svc-actions{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div id="loader"><div><div class="loader-logo">STREAMING</div><div class="loader-bar"><div class="loader-fill"></div></div></div></div>
+<nav>
+  <a class="nav-logo" href="index.html">POWER <span>ONE</span> PY</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html" onclick="closeMenu()">Inicio</a></li>
+    <li><a href="productos.html" onclick="closeMenu()">Productos</a></li>
+    <li><a href="streaming.html" class="active" onclick="closeMenu()">Streaming</a></li>
+    <li><a href="index.html#contacto" onclick="closeMenu()">Contacto</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="theme-switcher">
+      <button class="theme-btn" data-theme="yellow" onclick="applyTheme('yellow')" title="Tema Amarillo"></button>
+      <button class="theme-btn" data-theme="orange" onclick="applyTheme('orange')" title="Tema Naranja"></button>
+    </div>
+    <button class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div>
+      <div class="page-breadcrumb"><a href="index.html">Inicio</a> / Streaming</div>
+      <h1 class="page-title">SERVICIOS DE <span class="acc">STREAMING</span></h1>
+      <p class="page-subtitle">Netflix, Disney+, HBO, Spotify y más — contratá individual o armá tu propio combo a medida y consultá por WhatsApp.</p>
+    </div>
+    <div class="combo-badge-wrap">
+      <div class="combo-badge" onclick="openCombo()" id="heroBadge">0</div>
+      <div class="combo-badge-label">en tu combo</div>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="stream-tabs">
+  <button class="stab active" onclick="switchTab('individual',this)">Servicios individuales</button>
+  <button class="stab" onclick="switchTab('combo',this)">Armar combo</button>
+</div>
+
+<!-- INDIVIDUAL TAB -->
+<div class="stream-section" id="tabIndividual">
+  <div class="stream-grid" id="streamGrid"></div>
+</div>
+
+<!-- COMBO TAB -->
+<div class="stream-section" id="tabCombo" style="display:none">
+  <div style="max-width:800px;margin:0 auto">
+    <div style="background:rgba(var(--accent-rgb),.05);border:1px solid rgba(var(--accent-rgb),.15);padding:1.5rem;margin-bottom:2rem">
+      <h3 style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--white);margin-bottom:.5rem">¿Cómo armar tu combo?</h3>
+      <p style="font-size:.9rem;color:rgba(255,255,255,.5);line-height:1.65">1. Seleccioná los servicios que querés haciendo clic en <strong style="color:var(--accent)">+ Agregar al combo</strong><br>2. Revisá tu selección en el panel lateral<br>3. Hacé clic en <strong style="color:#25D366">Solicitar combo por WhatsApp</strong> y te contactamos</p>
+    </div>
+    <div class="stream-grid" id="comboPickGrid"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-inner">
+    <div><div class="foot-logo">POWER <span>ONE</span> PY</div><p class="foot-tagline">Streaming, tecnología y electrónica en Paraguay.</p></div>
+    <div><div class="foot-col-title">Navegación</div><ul class="foot-links"><li><a href="index.html">Inicio</a></li><li><a href="productos.html">Productos</a></li><li><a href="streaming.html">Streaming</a></li></ul></div>
+    <div><div class="foot-col-title">One Store Py</div><ul class="foot-links"><li><a href="#">Garantía</a></li><li><a href="#">Soporte</a></li></ul></div>
+  </div>
+  <div class="foot-bottom"><span id="footYear"></span><span>One Store Py</span></div>
+</footer>
+
+<a class="wa-float" id="waFloat" href="#" target="_blank">💬</a>
+<div class="toast" id="toast"></div>
+
+<!-- FLOATING COMBO BTN -->
+<button class="combo-float" id="comboFloat" onclick="openCombo()" style="display:none">
+  🎬 Mi Combo <span class="combo-float-count" id="comboFloatCount">0</span>
+</button>
+
+<!-- COMBO DRAWER -->
+<div class="combo-overlay" id="comboOverlay" onclick="if(event.target===this)closeCombo()">
+  <div class="combo-drawer">
+    <div class="combo-head">
+      <div>
+        <h2>MI COMBO</h2>
+        <p>Servicios seleccionados</p>
+      </div>
+      <button class="combo-close" onclick="closeCombo()">✕</button>
+    </div>
+    <div class="combo-body" id="comboBody"></div>
+    <div class="combo-footer">
+      <div class="combo-total-row">
+        <div><div class="combo-total-label">Total mensual</div></div>
+        <div class="combo-total-price" id="comboTotal">Gs. 0</div>
+      </div>
+      <div class="combo-discount-note" id="comboDiscNote"></div>
+      <button class="btn-request-combo" id="btnRequestCombo" onclick="requestCombo()" disabled>
+        💬 Solicitar combo por WhatsApp
+      </button>
+      <button class="btn-clear-combo" onclick="clearCombo()">🗑 Limpiar selección</button>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+let DB = null;
+let combo = []; // array of streaming service ids
+let waNumber = '595981570126';
+
+window.addEventListener('load', async () => {
+  initTheme();
+  setTimeout(()=>document.getElementById('loader').classList.add('hide'),1000);
+  document.getElementById('footYear').textContent=`© ${new Date().getFullYear()} Power One Py.`;
+  DB = await loadDB();
+  waNumber = DB.config?.wa || '595981570126';
+  document.getElementById('waFloat').href = `https://wa.me/${waNumber}`;
+  renderStreamingGrids();
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCombo();});
+});
+
+function getStreaming() {
+  return DB.streaming || defaultData().streaming;
+}
+
+function renderStreamingGrids() {
+  const list = getStreaming();
+  // Individual tab
+  document.getElementById('streamGrid').innerHTML = list.map(s => svcCard(s, false)).join('');
+  // Combo tab
+  document.getElementById('comboPickGrid').innerHTML = list.map(s => svcCard(s, true)).join('');
+}
+
+function svcCard(s, isComboTab) {
+  const inCombo = combo.includes(s.id);
+  const singleWa = `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hola! Me interesa contratar ${s.name} — ${s.price}/mes`)}`;
+  return `<div class="svc-card" id="scard-${s.id}">
+    <div class="svc-card-top">
+      <span class="svc-card-icon">${s.icon}</span>
+      <div class="svc-card-name">${s.name}</div>
+      <div class="svc-card-desc">${s.desc}</div>
+    </div>
+    <div class="svc-card-bottom">
+      <div class="svc-price">${s.price}<small>/mes</small></div>
+      <div class="svc-actions">
+        <button class="btn-add-combo ${inCombo?'added':''}" onclick="toggleCombo(${s.id})">
+          ${inCombo ? '✓ En combo' : '+ Al combo'}
+        </button>
+        <a class="btn-consult-single" href="${singleWa}" target="_blank">💬 Contratar</a>
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleCombo(id) {
+  const s = getStreaming().find(x=>x.id===id);
+  if (!s) return;
+  if (combo.includes(id)) {
+    combo = combo.filter(x=>x!==id);
+    showToast(`${s.name} quitado del combo`);
+  } else {
+    combo.push(id);
+    showToast(`✅ ${s.name} agregado al combo`);
+  }
+  updateComboUI();
+  renderStreamingGrids(); // refresh button states
+}
+
+function updateComboUI() {
+  const list = getStreaming();
+  const count = combo.length;
+
+  // Update badges
+  document.getElementById('heroBadge').textContent = count;
+  document.getElementById('comboFloatCount').textContent = count;
+  document.getElementById('comboFloat').style.display = count > 0 ? 'flex' : 'none';
+
+  // Combo body
+  if (!count) {
+    document.getElementById('comboBody').innerHTML = `<div class="combo-empty"><span class="empty-icon">🎬</span>Tu combo está vacío.<br>Agregá servicios para armar tu paquete.</div>`;
+    document.getElementById('comboTotal').textContent = 'Gs. 0';
+    document.getElementById('comboDiscNote').innerHTML = '';
+    document.getElementById('btnRequestCombo').disabled = true;
+    return;
+  }
+
+  const selected = list.filter(s=>combo.includes(s.id));
+  document.getElementById('comboBody').innerHTML = selected.map(s=>`
+    <div class="combo-item">
+      <div class="combo-item-icon">${s.icon}</div>
+      <div class="combo-item-info">
+        <div class="combo-item-name">${s.name}</div>
+        <div class="combo-item-price">${s.price}/mes</div>
+      </div>
+      <button class="combo-rm" onclick="toggleCombo(${s.id})" title="Quitar">✕</button>
+    </div>`).join('');
+
+  // Calculate total
+  let total = 0;
+  selected.forEach(s => {
+    const raw = s.price.replace(/\./g,'').replace(/,/g,'.');
+    const m = raw.match(/\d+(\.\d+)?/);
+    if (m) total += parseFloat(m[0]);
+  });
+
+  // Combo discount: 5% per service after 2, max 20%
+  let discPct = 0;
+  if (count >= 2) discPct = Math.min((count - 1) * 5, 20);
+  const discounted = discPct > 0 ? Math.round(total * (1 - discPct/100)) : total;
+
+  const fmt = n => n.toLocaleString('de-DE') + ' Gs.';
+  document.getElementById('comboTotal').textContent = fmt(discounted);
+  document.getElementById('comboDiscNote').innerHTML = discPct > 0
+    ? `<span>🎉 Descuento por combo: -${discPct}%</span> — Ahorrás ${fmt(total - discounted)}`
+    : count >= 2 ? '' : 'Agregá más de 1 servicio para obtener descuento de combo';
+  document.getElementById('btnRequestCombo').disabled = false;
+}
+
+function requestCombo() {
+  if (!combo.length) return;
+  const list = getStreaming();
+  const selected = list.filter(s=>combo.includes(s.id));
+  let total = 0;
+  selected.forEach(s=>{const m=s.price.replace(/\./g,'').replace(/,/g,'.').match(/\d+/);if(m)total+=parseInt(m[0]);});
+  const count = combo.length;
+  const discPct = count >= 2 ? Math.min((count-1)*5,20) : 0;
+  const discounted = discPct>0 ? Math.round(total*(1-discPct/100)) : total;
+  const fmt = n => n.toLocaleString('de-DE') + ' Gs.';
+
+  let msg = '🎬 Hola! Quiero armar un combo de streaming:\n\n';
+  selected.forEach(s=>{ msg += `✅ ${s.icon} ${s.name} — ${s.price}/mes\n`; });
+  msg += `\n💰 Total: ${fmt(total)}/mes`;
+  if (discPct > 0) msg += `\n🎉 Con descuento combo (-${discPct}%): ${fmt(discounted)}/mes`;
+  msg += '\n\n¿Cómo procedo?';
+
+  window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+function clearCombo() {
+  combo = [];
+  updateComboUI();
+  renderStreamingGrids();
+  showToast('Combo limpiado');
+}
+
+function openCombo() {
+  updateComboUI();
+  document.getElementById('comboOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeCombo() {
+  document.getElementById('comboOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tabIndividual').style.display = tab==='individual'?'block':'none';
+  document.getElementById('tabCombo').style.display = tab==='combo'?'block':'none';
+}
+</script>
+</body>
+</html>
