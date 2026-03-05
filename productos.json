@@ -1,0 +1,50 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Auricular Bluetooth Pro",
+      "cat": "Electrónica",
+      "desc": "Auriculares inalámbricos con cancelación de ruido y 30hs de batería.",
+      "price": "150.000 Gs.",
+      "badge": "Nuevo",
+      "img": ""
+    },
+    {
+      "id": 2,
+      "name": "Teclado Mecánico RGB",
+      "cat": "Informática",
+      "desc": "Teclado mecánico con switches azules y retroiluminación RGB completa.",
+      "price": "280.000 Gs.",
+      "badge": "Hot",
+      "img": ""
+    },
+    {
+      "id": 3,
+      "name": "Autoradio 2DIN Android",
+      "cat": "Car Audio",
+      "desc": "Radio para auto con pantalla táctil, Android Auto, WiFi y GPS integrado.",
+      "price": "450.000 Gs.",
+      "badge": "Oferta",
+      "img": ""
+    }
+  ],
+  "categories": [
+    { "id": 1, "name": "Electrónica", "icon": "📱" },
+    { "id": 2, "name": "Informática", "icon": "💻" },
+    { "id": 3, "name": "Car Audio", "icon": "🚗" }
+  ],
+  "services": [
+    { "id": 1, "icon": "🛡️", "name": "Garantía de fábrica", "desc": "Todos nuestros productos cuentan con garantía oficial del fabricante." },
+    { "id": 2, "icon": "🚚", "name": "Envío a todo el país", "desc": "Enviamos por encomienda a cualquier punto de Paraguay." },
+    { "id": 3, "icon": "💬", "name": "Asesoramiento personalizado", "desc": "Te ayudamos a elegir el producto ideal para tus necesidades." },
+    { "id": 4, "icon": "💳", "name": "Facilidades de pago", "desc": "Aceptamos transferencia, efectivo y cuotas sin interés." }
+  ],
+  "config": {
+    "wa": "595981570126",
+    "city": "Asunción, Paraguay",
+    "email": "info@poweronepy.com",
+    "address": "Asunción, Paraguay",
+    "hours": "Lun-Sáb 08:00 - 18:00",
+    "heroDesc": "Tu destino de tecnología en Paraguay. Electrónica, informática y car audio al mejor precio del mercado."
+  }
+}
