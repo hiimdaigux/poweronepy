@@ -33,19 +33,7 @@ h1.hero-title .acc{color:var(--accent)}
 .stream-icon{font-size:2.5rem;margin-bottom:.7rem}
 .stream-name{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--white);letter-spacing:.05em;margin-bottom:.3rem}
 .stream-price{font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:600;color:var(--accent);letter-spacing:.08em}
-#servicios{background:var(--black)}
-.services-wrap{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;max-width:1200px;margin:0 auto}
-.brand-display{position:relative}
-.brand-big{font-family:'Bebas Neue',sans-serif;font-size:clamp(4rem,9vw,8.5rem);line-height:.88}
-.brand-big .l1{color:var(--white)}.brand-big .l2{color:var(--accent);margin-left:1.5rem}.brand-big .l3{color:rgba(255,255,255,.1);font-size:.58em}
-.brand-deco{position:absolute;top:-15px;right:15px;width:100px;height:100px;border:2px solid rgba(var(--accent-rgb),.15);border-radius:50%}
-.brand-sub{margin-top:1.5rem;font-size:.97rem;color:rgba(255,255,255,.45);line-height:1.75;max-width:300px}
-.svc-list{display:flex;flex-direction:column;gap:1rem}
-.svc-item{display:flex;gap:1.1rem;align-items:flex-start;padding:1.4rem;background:var(--bs);border-left:3px solid var(--accent);transition:all .25s}
-.svc-item:hover{background:rgba(var(--accent-rgb),.04);transform:translateX(5px)}
-.svc-icon{font-size:1.7rem;flex-shrink:0}
-.svc-name{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;color:var(--white);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem}
-.svc-desc{font-size:.87rem;color:rgba(255,255,255,.45);line-height:1.55}
+
 #contacto{background:var(--bm)}
 .contact-wrap{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;max-width:1100px;margin:0 auto}
 .contact-items{display:flex;flex-direction:column;gap:1.4rem;margin-top:1.5rem}
@@ -123,24 +111,14 @@ h1.hero-title .acc{color:var(--accent)}
   <div class="prod-grid" id="featuredGrid"><div class="prod-loading"><div class="spinner"></div></div></div>
   <div class="view-all-wrap reveal" style="margin-top:2.5rem"><a href="productos.html" class="btn-accent">Ver todos los productos →</a></div>
 </section>
-<section id="streaming-preview">
+<section id="streaming" style="background:var(--bm);padding:90px 5%">
   <div class="section-header reveal">
     <div class="section-tag">One Store Py</div>
     <h2 class="section-title">SERVICIOS DE <span class="acc">STREAMING</span></h2>
-    <p class="section-sub">Netflix, Spotify, Disney+ y más — individuales o armá tu propio combo</p>
+    <p class="section-sub">Netflix, Spotify, Disney+ y más — contratá individual o armá tu combo a medida</p>
   </div>
   <div class="stream-preview-grid reveal" id="streamPreviewGrid"></div>
-  <div class="view-all-wrap"><a href="streaming.html" class="btn-accent">🎬 Armar mi combo →</a></div>
-</section>
-<section id="servicios">
-  <div class="services-wrap">
-    <div class="brand-display reveal">
-      <div class="brand-big"><div class="l1">ONE</div><div class="l2">STORE</div><div class="l3">PY</div></div>
-      <div class="brand-deco"></div>
-      <p class="brand-sub">Tu tienda de confianza. Productos, streaming y tecnología al mejor precio en Paraguay.</p>
-    </div>
-    <div class="svc-list reveal" id="svcList"></div>
-  </div>
+  <div class="view-all-wrap"><a href="streaming.html" class="btn-accent">🎬 Ver todos y armar combo →</a></div>
 </section>
 <section id="contacto">
   <div class="section-header reveal">
@@ -191,7 +169,7 @@ window.addEventListener('load',async()=>{
   document.getElementById('ctaWa').href=wa;
   if(c.heroDesc)document.getElementById('heroSub').textContent=c.heroDesc;
   if(c.city)document.getElementById('footTagline').textContent=`Electrónica, Informática & Car Audio al mejor precio en ${c.city}.`;
-  renderCats();renderFeatured();renderStreamPreview();renderServices();renderContact();
+  renderCats();renderFeatured();renderStreamPreview();renderContact();
   animNum('statP',(DB.products||[]).length);animNum('statC',(DB.categories||[]).length);
   initReveal();
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
@@ -208,13 +186,10 @@ function renderFeatured(){
 }
 function renderStreamPreview(){
   const streaming=DB.streaming||(defaultData?defaultData().streaming:[]);
-  document.getElementById('streamPreviewGrid').innerHTML=streaming.slice(0,6).map(s=>
-    `<div class="stream-card-sm"><div class="stream-icon">${s.icon}</div><div class="stream-name">${s.name}</div><div class="stream-price">desde ${s.price}</div></div>`).join('');
+  document.getElementById('streamPreviewGrid').innerHTML=streaming.slice(0,8).map(s=>
+    `<a class="stream-card-sm" href="streaming.html" style="text-decoration:none;cursor:pointer"><div class="stream-icon">${s.icon}</div><div class="stream-name">${s.name}</div><div class="stream-price">desde ${s.price}</div></a>`).join('');
 }
-function renderServices(){
-  document.getElementById('svcList').innerHTML=(DB.services||[]).map(s=>
-    `<div class="svc-item"><div class="svc-icon">${s.icon}</div><div><div class="svc-name">${s.name}</div><div class="svc-desc">${s.desc}</div></div></div>`).join('');
-}
+
 function renderContact(){
   const c=DB.config||{};
   const items=[{icon:'📱',label:'WhatsApp',val:c.wa?`+${c.wa}`:null},{icon:'📍',label:'Ubicación',val:c.address||c.city},{icon:'📧',label:'Email',val:c.email},{icon:'🕐',label:'Horarios',val:c.hours}].filter(i=>i.val);

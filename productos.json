@@ -1,96 +1,36 @@
 {
   "products": [
-    {
-      "id": 1,
-      "name": "Auricular Bluetooth Pro",
-      "cat": "Electrónica",
-      "desc": "Auriculares inalámbricos con cancelación de ruido y 30hs de batería.",
-      "price": "150.000 Gs.",
-      "badge": "Nuevo",
-      "img": "https://res.cloudinary.com/drzu2lb6c/image/upload/v1772674765/poweronepy/yes8pqg1hnwiwzjas7hv.jpg",
-      "discount": ""
-    },
-    {
-      "id": 2,
-      "name": "Teclado Mecánico RGB",
-      "cat": "Informática",
-      "desc": "Teclado mecánico con switches azules y retroiluminación RGB.",
-      "price": "280.000 Gs.",
-      "badge": "Hot",
-      "img": "https://res.cloudinary.com/drzu2lb6c/image/upload/v1772674775/poweronepy/bjmupfs3tdm4bjj5w3ly.jpg",
-      "discount": ""
-    },
-    {
-      "id": 3,
-      "name": "Autoradio 2DIN Android Stock",
-      "cat": "Car Audio",
-      "desc": "Pantalla táctil, Android Auto, WiFi y GPS.",
-      "price": "450.000 Gs.",
-      "badge": "Oferta",
-      "img": "https://res.cloudinary.com/drzu2lb6c/image/upload/v1772674783/poweronepy/hvsng8dxwnosjrjtry6k.jpg",
-      "discount": ""
-    },
-    {
-      "id": 1772673312342,
-      "name": "Grafica Asus RTX 4060 ROG Strix",
-      "cat": "Informática",
-      "desc": "Tarjeta gráfica para juegos (PCIe 4.0, 8GB GDDR6, DLSS 3, HDMI 2.1a, DisplayPort 1.4a, diseño de ventilador Axial-tech, Aura Sync, tecnología 0dB)",
-      "price": "6.900.000 Gs.",
-      "badge": "Nuevo",
-      "img": "https://res.cloudinary.com/drzu2lb6c/image/upload/v1772673305/poweronepy/hqcqbiytpy4lfumfxuo7.jpg",
-      "discount": "5"
-    }
+    { "id": 1, "name": "Auricular Bluetooth Pro", "cat": "Electrónica", "desc": "Auriculares inalámbricos con cancelación de ruido y 30hs de batería.", "price": "150.000 Gs.", "badge": "Nuevo", "img": "", "discount": "" },
+    { "id": 2, "name": "Teclado Mecánico RGB", "cat": "Informática", "desc": "Teclado mecánico con switches azules y retroiluminación RGB completa.", "price": "280.000 Gs.", "badge": "", "img": "", "discount": "15" },
+    { "id": 3, "name": "Autoradio 2DIN Android", "cat": "Car Audio", "desc": "Pantalla táctil, Android Auto, WiFi y GPS integrado.", "price": "450.000 Gs.", "badge": "Hot", "img": "", "discount": "" }
   ],
   "categories": [
-    {
-      "id": 1,
-      "name": "Electrónica",
-      "icon": "📱"
-    },
-    {
-      "id": 2,
-      "name": "Informática",
-      "icon": "💻"
-    },
-    {
-      "id": 3,
-      "name": "Car Audio",
-      "icon": "🚗"
-    }
+    { "id": 1, "name": "Electrónica", "icon": "📱" },
+    { "id": 2, "name": "Informática", "icon": "💻" },
+    { "id": 3, "name": "Car Audio", "icon": "🚗" }
   ],
-  "streaming": [],
+  "streaming": [
+    { "id": 1, "name": "Netflix", "icon": "🎬", "desc": "Plan estándar con anuncios o premium. HD/4K disponible.", "price": "25.000 Gs.", "combo": true },
+    { "id": 2, "name": "Disney+", "icon": "🏰", "desc": "Disney, Marvel, Star Wars, Pixar y National Geographic.", "price": "22.000 Gs.", "combo": true },
+    { "id": 3, "name": "HBO Max", "icon": "👑", "desc": "Series HBO, películas Warner y contenido exclusivo.", "price": "22.000 Gs.", "combo": true },
+    { "id": 4, "name": "Spotify", "icon": "🎵", "desc": "Música sin anuncios, descargas y calidad premium.", "price": "15.000 Gs.", "combo": true },
+    { "id": 5, "name": "YouTube Premium", "icon": "▶️", "desc": "Sin anuncios, YouTube Music y descarga de videos.", "price": "18.000 Gs.", "combo": true },
+    { "id": 6, "name": "Prime Video", "icon": "📦", "desc": "Series y películas Amazon originales en HD/4K.", "price": "18.000 Gs.", "combo": true },
+    { "id": 7, "name": "Paramount+", "icon": "⭐", "desc": "Contenido Paramount, CBS, MTV, Nickelodeon y más.", "price": "18.000 Gs.", "combo": true },
+    { "id": 8, "name": "Apple TV+", "icon": "🍎", "desc": "Series y películas exclusivas Apple Originals.", "price": "20.000 Gs.", "combo": true }
+  ],
   "services": [
-    {
-      "id": 1,
-      "icon": "🛡️",
-      "name": "Garantía de fábrica",
-      "desc": "Todos nuestros productos cuentan con garantía oficial."
-    },
-    {
-      "id": 2,
-      "icon": "🚚",
-      "name": "Envío a todo el país",
-      "desc": "Enviamos por encomienda a cualquier punto de Paraguay."
-    },
-    {
-      "id": 3,
-      "icon": "💬",
-      "name": "Asesoramiento personalizado",
-      "desc": "Te ayudamos a elegir el producto ideal."
-    },
-    {
-      "id": 4,
-      "icon": "💳",
-      "name": "Facilidades de pago",
-      "desc": "Transferencia, efectivo y cuotas sin interés."
-    }
+    { "id": 1, "icon": "🛡️", "name": "Garantía de fábrica", "desc": "Todos nuestros productos cuentan con garantía oficial del fabricante." },
+    { "id": 2, "icon": "🚚", "name": "Envío a todo el país", "desc": "Enviamos por encomienda a cualquier punto de Paraguay." },
+    { "id": 3, "icon": "💬", "name": "Asesoramiento personalizado", "desc": "Te ayudamos a elegir el producto ideal para tus necesidades." },
+    { "id": 4, "icon": "💳", "name": "Facilidades de pago", "desc": "Aceptamos transferencia, efectivo y cuotas sin interés." }
   ],
   "config": {
     "wa": "595981570126",
-    "city": "San Lorenzo, Paraguay",
-    "email": "poweronepy84@gmail.com",
-    "address": "San Lorenzo, Paraguay",
+    "city": "Asunción, Paraguay",
+    "email": "info@poweronepy.com",
+    "address": "Asunción, Paraguay",
     "hours": "Lun-Sáb 08:00 - 18:00",
-    "heroDesc": "Tu destino de tecnología en Paraguay."
+    "heroDesc": "Tu destino de tecnología en Paraguay. Electrónica, informática y car audio al mejor precio del mercado."
   }
 }

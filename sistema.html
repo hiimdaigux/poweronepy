@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema — Power One Py</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{--y:#FFD600;--b:#0A0A0A;--bm:#1A1A1A;--bs:#242424;--w:#fff;--red:#ff4d4d;--green:#4caf50;--blue:#2196F3}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Barlow',sans-serif;background:var(--b);color:var(--w);min-height:100vh;display:flex}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--y)}
+
+/* SIDEBAR */
+.sidebar{width:220px;background:var(--bm);border-right:1px solid rgba(255,214,0,.1);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:100;overflow-y:auto}
+.sbl{padding:1.3rem 1.5rem;border-bottom:1px solid rgba(255,214,0,.1)}
+.sbl-logo{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--w);letter-spacing:.06em}
+.sbl-logo span{color:var(--y)}
+.sbl-sub{font-size:.7rem;color:rgba(255,255,255,.3);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.15em;margin-top:.15rem}
+.snav{flex:1;padding:.8rem 0}
+.sgrp{padding:.5rem 1.5rem .3rem;font-family:'Barlow Condensed',sans-serif;font-size:.65rem;font-weight:700;color:rgba(255,255,255,.22);text-transform:uppercase;letter-spacing:.2em}
+.ni{display:flex;align-items:center;gap:.8rem;padding:.75rem 1.5rem;cursor:pointer;color:rgba(255,255,255,.45);font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.85rem;text-transform:uppercase;letter-spacing:.06em;transition:all .2s;border-left:3px solid transparent}
+.ni:hover{color:rgba(255,255,255,.85);background:rgba(255,255,255,.03)}
+.ni.active{color:var(--y);border-left-color:var(--y);background:rgba(255,214,0,.04)}
+.ni-ic{font-size:1rem;width:20px;text-align:center}
+.sfooter{padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.05)}
+
+/* MAIN */
+.main{margin-left:220px;flex:1;min-height:100vh;display:flex;flex-direction:column}
+.topbar{background:var(--bs);border-bottom:1px solid rgba(255,214,0,.1);padding:.9rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar h1{font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:var(--w);letter-spacing:.05em}
+.content{padding:1.8rem 2rem;flex:1}
+
+/* TYPOGRAPHY */
+.fl{display:block;font-family:'Barlow Condensed',sans-serif;font-size:.75rem;font-weight:600;color:var(--y);text-transform:uppercase;letter-spacing:.12em;margin-bottom:.4rem}
+.fi{width:100%;background:var(--bs);border:1px solid rgba(255,255,255,.1);color:var(--w);font-family:'Barlow',sans-serif;font-size:.88rem;padding:9px 12px;outline:none;transition:border .2s;margin-bottom:0}
+.fi:focus{border-color:var(--y)}
+select.fi option{background:var(--bm)}
+textarea.fi{resize:vertical}
+.fgroup{margin-bottom:1rem}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.fg-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+.fg-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1rem}
+.s2{grid-column:1/-1}
+
+/* BUTTONS */
+.btn{border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;padding:9px 18px;display:inline-flex;align-items:center;gap:6px;transition:all .2s}
+.btn-y{background:var(--y);color:var(--b)}.btn-y:hover{filter:brightness(1.1)}
+.btn-g{background:rgba(76,175,80,.15);border:1px solid rgba(76,175,80,.3);color:#4caf50}.btn-g:hover{background:rgba(76,175,80,.25)}
+.btn-r{background:rgba(255,77,77,.12);border:1px solid rgba(255,77,77,.25);color:var(--red)}.btn-r:hover{background:rgba(255,77,77,.22)}
+.btn-b{background:rgba(33,150,243,.12);border:1px solid rgba(33,150,243,.25);color:var(--blue)}.btn-b:hover{background:rgba(33,150,243,.22)}
+.btn-ghost{background:none;border:1px solid rgba(255,255,255,.14);color:rgba(255,255,255,.55)}.btn-ghost:hover{border-color:var(--y);color:var(--y)}
+.btn-sm{font-size:.72rem;padding:5px 11px}
+.btn-full{width:100%;justify-content:center}
+
+/* CARDS */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.8rem}
+.sc{background:var(--bm);border:1px solid rgba(255,255,255,.06);padding:1.3rem 1.5rem}
+.sc-num{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;line-height:1}
+.sc-label{font-family:'Barlow Condensed',sans-serif;font-size:.75rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.1em;margin-top:.2rem}
+.sc.yellow .sc-num{color:var(--y)}
+.sc.green .sc-num{color:var(--green)}
+.sc.red .sc-num{color:var(--red)}
+.sc.blue .sc-num{color:var(--blue)}
+
+/* PANEL */
+.panel{background:var(--bm);border:1px solid rgba(255,255,255,.06);margin-bottom:1.5rem}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.4rem;border-bottom:1px solid rgba(255,255,255,.05);background:var(--bs)}
+.ph-title{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--w);letter-spacing:.05em}
+.pb{padding:1.4rem}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:.86rem}
+.tbl th{background:rgba(0,0,0,.25);font-family:'Barlow Condensed',sans-serif;font-size:.73rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--y);padding:9px 13px;text-align:left;border-bottom:1px solid rgba(255,214,0,.1)}
+.tbl td{padding:9px 13px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle;color:rgba(255,255,255,.78)}
+.tbl tr:hover td{background:rgba(255,255,255,.015)}
+.tbl .actions{display:flex;gap:.35rem;flex-wrap:wrap}
+.badge{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:.08em;padding:2px 8px;text-transform:uppercase}
+.badge-y{background:rgba(255,214,0,.15);color:var(--y);border:1px solid rgba(255,214,0,.2)}
+.badge-g{background:rgba(76,175,80,.15);color:#4caf50;border:1px solid rgba(76,175,80,.2)}
+.badge-r{background:rgba(255,77,77,.15);color:#ff4d4d;border:1px solid rgba(255,77,77,.2)}
+.badge-b{background:rgba(33,150,243,.15);color:#64b5f6;border:1px solid rgba(33,150,243,.2)}
+.divider{border:none;border-top:1px solid rgba(255,255,255,.06);margin:1.2rem 0}
+
+/* PAGES */
+.page{display:none}.page.active{display:block}
+
+/* MODAL */
+.moverlay{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s}
+.moverlay.open{opacity:1;visibility:visible}
+.mbox{background:var(--bm);border:1px solid rgba(255,214,0,.15);width:100%;max-width:700px;max-height:90vh;overflow-y:auto;transform:translateY(16px);transition:transform .3s}
+.moverlay.open .mbox{transform:translateY(0)}
+.mhead{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.4rem;background:var(--bs);border-bottom:1px solid rgba(255,255,255,.06);position:sticky;top:0;z-index:5}
+.mhead-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--w);letter-spacing:.05em}
+.mclose{background:none;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);cursor:pointer;width:32px;height:32px;font-size:.9rem;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.mclose:hover{border-color:var(--y);color:var(--y)}
+.mbody{padding:1.4rem}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--y);color:var(--b);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:.1em;text-transform:uppercase;padding:11px 22px;z-index:9999;transition:transform .3s;pointer-events:none;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}.toast.err{background:#ff5252;color:#fff}
+
+/* PRINT */
+@media print{
+  body{background:#fff;color:#000}
+  .sidebar,.topbar,.no-print{display:none!important}
+  .main{margin-left:0}
+  .print-area{display:block!important}
+  * {-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+.print-area{display:none}
+
+/* PRINT DOCUMENT */
+.doc-sheet{background:#fff;color:#111;font-family:'Barlow',sans-serif;width:210mm;min-height:297mm;margin:0 auto;padding:15mm 18mm;position:relative}
+.doc-header{display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:start;border-bottom:3px solid #111;padding-bottom:1.2rem;margin-bottom:1.5rem}
+.doc-brand{font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:#111;letter-spacing:.1em;line-height:1}
+.doc-brand-sub{font-size:.8rem;color:#555;margin-top:.25rem}
+.doc-type-box{background:#111;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:1.8rem;padding:10px 22px;letter-spacing:.12em;text-align:center}
+.doc-type-num{font-size:.8rem;font-family:'Barlow',sans-serif;color:#fff;letter-spacing:.05em;opacity:.7;margin-top:2px;text-align:center}
+.doc-meta{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+.doc-meta-box{background:#f8f8f8;border:1px solid #ddd;padding:.8rem 1rem}
+.doc-meta-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#888;margin-bottom:.5rem}
+.doc-meta-val{font-size:.88rem;color:#111;line-height:1.5}
+.doc-table{width:100%;border-collapse:collapse;margin-bottom:1.5rem}
+.doc-table th{background:#111;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;padding:8px 10px;text-align:left}
+.doc-table td{padding:7px 10px;border-bottom:1px solid #eee;font-size:.85rem}
+.doc-table tr:nth-child(even) td{background:#fafafa}
+.doc-table .right{text-align:right}
+.doc-totals{display:flex;justify-content:flex-end;margin-bottom:1.5rem}
+.doc-totals-box{min-width:260px}
+.doc-total-row{display:flex;justify-content:space-between;padding:5px 0;font-size:.88rem;border-bottom:1px solid #eee}
+.doc-total-row.final{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.1rem;border-bottom:2px solid #111;padding-top:8px}
+.doc-footer{border-top:1px solid #ddd;padding-top:1rem;font-size:.75rem;color:#888;display:flex;justify-content:space-between;margin-top:auto}
+.doc-sign-box{border-top:1px solid #aaa;width:180px;text-align:center;padding-top:.4rem;font-size:.72rem;color:#888;margin-top:3rem}
+.doc-signs{display:flex;justify-content:space-between}
+.doc-note{background:#f8f8f8;border-left:3px solid #111;padding:.7rem 1rem;font-size:.82rem;color:#444;margin-bottom:1.5rem}
+
+/* PRESUPUESTO ITEM ROW */
+.pres-item-row{display:grid;grid-template-columns:1fr 80px 100px 90px 30px;gap:.5rem;align-items:center;margin-bottom:.5rem}
+.pres-total-row{background:rgba(255,214,0,.06);border:1px solid rgba(255,214,0,.15);padding:1rem 1.2rem;display:flex;justify-content:space-between;align-items:center;margin-top:.5rem}
+.pres-total-num{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--y)}
+
+/* STOCK INDICATOR */
+.stock-bar-wrap{width:80px;height:5px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;display:inline-block;vertical-align:middle}
+.stock-bar{height:100%;border-radius:2px;transition:width .3s}
+
+/* MOVEMENT TAG */
+.mov-in{color:var(--green)}.mov-out{color:var(--red)}
+
+@media(max-width:900px){.stat-row{grid-template-columns:1fr 1fr}.fg-4{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.stat-row{grid-template-columns:1fr}.fg,.fg-3,.fg-4{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sbl">
+    <div class="sbl-logo">POWER <span>ONE</span> PY</div>
+    <div class="sbl-sub">Sistema de Gestión</div>
+  </div>
+  <nav class="snav">
+    <div class="sgrp">General</div>
+    <div class="ni active" onclick="goPage('dashboard')"><span class="ni-ic">📊</span>Dashboard</div>
+    <div class="sgrp">Inventario</div>
+    <div class="ni" onclick="goPage('stock')"><span class="ni-ic">📦</span>Stock</div>
+    <div class="ni" onclick="goPage('movimientos')"><span class="ni-ic">↕</span>Movimientos</div>
+    <div class="sgrp">Contactos</div>
+    <div class="ni" onclick="goPage('clientes')"><span class="ni-ic">👥</span>Clientes</div>
+    <div class="ni" onclick="goPage('proveedores')"><span class="ni-ic">🏭</span>Proveedores</div>
+    <div class="sgrp">Documentos</div>
+    <div class="ni" onclick="goPage('presupuestos')"><span class="ni-ic">💰</span>Presupuestos</div>
+    <div class="ni" onclick="goPage('facturas')"><span class="ni-ic">🧾</span>Facturas</div>
+    <div class="ni" onclick="goPage('recibos')"><span class="ni-ic">📄</span>Recibos</div>
+    <div class="sgrp">Reportes</div>
+    <div class="ni" onclick="goPage('reportes')"><span class="ni-ic">📈</span>Reportería</div>
+  </nav>
+  <div class="sfooter">
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+      <a href="admin.html" class="btn btn-ghost btn-sm" style="text-decoration:none">⚙ Admin</a>
+      <a href="index.html" class="btn btn-ghost btn-sm" style="text-decoration:none">🌐 Sitio</a>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <h1 id="pageTitle">DASHBOARD</h1>
+    <div style="display:flex;gap:.7rem;align-items:center">
+      <span id="todayDate" style="font-size:.82rem;color:rgba(255,255,255,.3);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em"></span>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <div class="page active" id="pageDashboard">
+      <div class="stat-row" id="dashStats"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+        <div class="panel">
+          <div class="ph"><div class="ph-title">ÚLTIMOS MOVIMIENTOS</div></div>
+          <div class="pb" id="dashMovs" style="max-height:320px;overflow-y:auto"></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="ph-title">STOCK BAJO</div></div>
+          <div class="pb" id="dashLowStock" style="max-height:320px;overflow-y:auto"></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;margin-top:1.5rem">
+        <div class="panel">
+          <div class="ph"><div class="ph-title">ÚLTIMAS FACTURAS</div></div>
+          <div class="pb" id="dashFacturas"></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="ph-title">PRESUPUESTOS</div></div>
+          <div class="pb" id="dashPresupuestos"></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="ph-title">CLIENTES</div></div>
+          <div class="pb" id="dashClientes"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ STOCK ═══ -->
+    <div class="page" id="pageStock">
+      <div class="panel">
+        <div class="ph">
+          <div class="ph-title">INVENTARIO (<span id="stockCount">0</span> ítems)</div>
+          <button class="btn btn-y" onclick="openModal('modalAddStock')">+ Agregar Ítem</button>
+        </div>
+        <div class="pb">
+          <div style="display:flex;gap:.8rem;margin-bottom:1.2rem;flex-wrap:wrap">
+            <input class="fi" type="text" id="stockSearch" placeholder="Buscar producto..." oninput="renderStock()" style="width:280px">
+            <select class="fi" id="stockCatFilter" onchange="renderStock()" style="width:180px"><option value="">Todas las categorías</option></select>
+          </div>
+          <div style="overflow-x:auto"><table class="tbl" id="stockTable"><thead><tr><th>Código</th><th>Producto</th><th>Categoría</th><th>Stock</th><th>Mín.</th><th>Precio Costo</th><th>Precio Venta</th><th>Ubicación</th><th>Acciones</th></tr></thead><tbody id="stockBody"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ MOVIMIENTOS ═══ -->
+    <div class="page" id="pageMovimientos">
+      <div class="panel">
+        <div class="ph">
+          <div class="ph-title">MOVIMIENTOS DE STOCK</div>
+          <button class="btn btn-y" onclick="openModal('modalAddMov')">+ Registrar</button>
+        </div>
+        <div class="pb">
+          <div style="display:flex;gap:.8rem;margin-bottom:1.2rem;flex-wrap:wrap">
+            <select class="fi" id="movTypeFilter" onchange="renderMovs()" style="width:160px"><option value="">Todos</option><option value="entrada">Entradas</option><option value="salida">Salidas</option><option value="ajuste">Ajustes</option></select>
+            <input class="fi" type="date" id="movDateFrom" onchange="renderMovs()" style="width:160px">
+            <input class="fi" type="date" id="movDateTo" onchange="renderMovs()" style="width:160px">
+          </div>
+          <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Fecha</th><th>Tipo</th><th>Producto</th><th>Cant.</th><th>Precio Unit.</th><th>Total</th><th>Proveedor/Cliente</th><th>Referencia</th><th>Notas</th></tr></thead><tbody id="movBody"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CLIENTES ═══ -->
+    <div class="page" id="pageClientes">
+      <div class="panel">
+        <div class="ph">
+          <div class="ph-title">CLIENTES (<span id="clientCount">0</span>)</div>
+          <button class="btn btn-y" onclick="openModal('modalAddClient')">+ Agregar Cliente</button>
+        </div>
+        <div class="pb">
+          <input class="fi" type="text" id="clientSearch" placeholder="Buscar cliente..." oninput="renderClients()" style="width:300px;margin-bottom:1rem">
+          <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>RUC/CI</th><th>Nombre / Razón</th><th>Email</th><th>Teléfono</th><th>Ciudad</th><th>Facturas</th><th>Total Compras</th><th>Acciones</th></tr></thead><tbody id="clientBody"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PROVEEDORES ═══ -->
+    <div class="page" id="pageProveedores">
+      <div class="panel">
+        <div class="ph">
+          <div class="ph-title">PROVEEDORES (<span id="provCount">0</span>)</div>
+          <button class="btn btn-y" onclick="openModal('modalAddProv')">+ Agregar Proveedor</button>
+        </div>
+        <div class="pb">
+          <input class="fi" type="text" id="provSearch" placeholder="Buscar proveedor..." oninput="renderProvs()" style="width:300px;margin-bottom:1rem">
+          <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>RUC</th><th>Razón Social</th><th>Contacto</th><th>Teléfono</th><th>Email</th><th>Ciudad</th><th>Banco</th><th>Acciones</th></tr></thead><tbody id="provBody"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PRESUPUESTOS ═══ -->
+    <div class="page" id="pagePresupuestos">
+      <div style="display:grid;grid-template-columns:1fr 380px;gap:1.5rem;align-items:start">
+        <div>
+          <div class="panel">
+            <div class="ph"><div class="ph-title" id="presFormTitle">NUEVO PRESUPUESTO</div><button class="btn btn-ghost" onclick="clearPres()">Limpiar</button></div>
+            <div class="pb">
+              <div class="fg">
+                <div class="fgroup"><label class="fl">Cliente</label><select class="fi" id="presClient"><option value="">Sin cliente / Walk-in</option></select></div>
+                <div class="fgroup"><label class="fl">Válido hasta</label><input class="fi" type="date" id="presValid"></div>
+                <div class="fgroup s2"><label class="fl">Notas</label><textarea class="fi" id="presNotes" rows="2" placeholder="Condiciones, aclaraciones..."></textarea></div>
+              </div>
+              <div class="divider"></div>
+              <div style="font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;color:var(--y);text-transform:uppercase;letter-spacing:.15em;margin-bottom:.7rem">ÍTEMS</div>
+              <div id="presItems"></div>
+              <button class="btn btn-ghost btn-sm" onclick="addPresItem()" style="margin-top:.5rem">+ Añadir ítem</button>
+              <div class="pres-total-row" style="margin-top:1rem">
+                <div>
+                  <div style="font-size:.78rem;color:rgba(255,255,255,.4);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em">Total</div>
+                  <div class="pres-total-num" id="presTotalDisplay">Gs. 0</div>
+                </div>
+                <div style="display:flex;gap:.7rem;flex-wrap:wrap">
+                  <button class="btn btn-b" onclick="previewDoc('presupuesto')">👁 Vista previa</button>
+                  <button class="btn btn-y" onclick="savePresupuesto()">💾 Guardar</button>
+                  <button class="btn btn-g" onclick="exportPresPDF()">⬇ PDF</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="ph-title">HISTORIAL</div></div>
+          <div class="pb" id="presHistory" style="max-height:600px;overflow-y:auto"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ FACTURAS ═══ -->
+    <div class="page" id="pageFacturas">
+      <div style="display:grid;grid-template-columns:1fr 380px;gap:1.5rem;align-items:start">
+        <div>
+          <div class="panel">
+            <div class="ph"><div class="ph-title" id="facFormTitle">NUEVA FACTURA</div><button class="btn btn-ghost" onclick="clearFac()">Limpiar</button></div>
+            <div class="pb">
+              <div class="fg">
+                <div class="fgroup"><label class="fl">Cliente *</label><select class="fi" id="facClient"><option value="">Consumidor Final</option></select></div>
+                <div class="fgroup"><label class="fl">Fecha</label><input class="fi" type="date" id="facDate"></div>
+                <div class="fgroup"><label class="fl">Nº Factura</label><input class="fi" type="text" id="facNum" placeholder="001-001-0000001"></div>
+                <div class="fgroup"><label class="fl">Condición de Pago</label><select class="fi" id="facPago"><option>Contado</option><option>Crédito 30 días</option><option>Crédito 60 días</option><option>Transferencia</option></select></div>
+                <div class="fgroup s2"><label class="fl">Notas</label><textarea class="fi" id="facNotes" rows="2" placeholder="Observaciones..."></textarea></div>
+              </div>
+              <div class="divider"></div>
+              <div style="font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;color:var(--y);text-transform:uppercase;letter-spacing:.15em;margin-bottom:.7rem">ÍTEMS</div>
+              <div id="facItems"></div>
+              <button class="btn btn-ghost btn-sm" onclick="addFacItem()" style="margin-top:.5rem">+ Añadir ítem</button>
+              <div class="pres-total-row" style="margin-top:1rem">
+                <div>
+                  <div style="font-size:.78rem;color:rgba(255,255,255,.4);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em">Total Factura</div>
+                  <div class="pres-total-num" id="facTotalDisplay">Gs. 0</div>
+                </div>
+                <div style="display:flex;gap:.7rem;flex-wrap:wrap">
+                  <button class="btn btn-b" onclick="previewDoc('factura')">👁 Vista previa</button>
+                  <button class="btn btn-y" onclick="saveFactura()">💾 Guardar</button>
+                  <button class="btn btn-g" onclick="printDoc('factura')">🖨 Imprimir</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="ph-title">HISTORIAL FACTURAS</div></div>
+          <div class="pb" id="facHistory" style="max-height:600px;overflow-y:auto"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ RECIBOS ═══ -->
+    <div class="page" id="pageRecibos">
+      <div style="display:grid;grid-template-columns:1fr 380px;gap:1.5rem;align-items:start">
+        <div>
+          <div class="panel">
+            <div class="ph"><div class="ph-title">NUEVO RECIBO</div><button class="btn btn-ghost" onclick="clearRec()">Limpiar</button></div>
+            <div class="pb">
+              <div class="fg">
+                <div class="fgroup"><label class="fl">Recibido de</label><select class="fi" id="recClient"><option value="">Escribir nombre...</option></select></div>
+                <div class="fgroup"><label class="fl">Nombre manual (si no está en lista)</label><input class="fi" type="text" id="recName" placeholder="Nombre del pagador"></div>
+                <div class="fgroup"><label class="fl">Fecha</label><input class="fi" type="date" id="recDate"></div>
+                <div class="fgroup"><label class="fl">Nº Recibo</label><input class="fi" type="text" id="recNum" placeholder="001-001-0000001"></div>
+                <div class="fgroup"><label class="fl">Importe (Gs.)</label><input class="fi" type="text" id="recMonto" placeholder="150.000" oninput="updateRecTotal()"></div>
+                <div class="fgroup"><label class="fl">Forma de Pago</label><select class="fi" id="recPago"><option>Efectivo</option><option>Transferencia</option><option>Tarjeta</option><option>Cheque</option></select></div>
+                <div class="fgroup s2"><label class="fl">Concepto *</label><textarea class="fi" id="recConcepto" rows="2" placeholder="Por concepto de..."></textarea></div>
+                <div class="fgroup s2"><label class="fl">Referencia (factura, pedido, etc.)</label><input class="fi" type="text" id="recRef" placeholder="Factura Nº 001-001-0000001"></div>
+              </div>
+              <div class="pres-total-row" style="margin-top:1rem">
+                <div>
+                  <div style="font-size:.78rem;color:rgba(255,255,255,.4);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em">Importe</div>
+                  <div class="pres-total-num" id="recTotalDisplay">Gs. 0</div>
+                </div>
+                <div style="display:flex;gap:.7rem">
+                  <button class="btn btn-b" onclick="previewDoc('recibo')">👁 Vista previa</button>
+                  <button class="btn btn-y" onclick="saveRecibo()">💾 Guardar</button>
+                  <button class="btn btn-g" onclick="printDoc('recibo')">🖨 Imprimir</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="ph-title">HISTORIAL RECIBOS</div></div>
+          <div class="pb" id="recHistory" style="max-height:600px;overflow-y:auto"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ REPORTES ═══ -->
+    <div class="page" id="pageReportes">
+      <div class="stat-row" id="reportStats"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+        <div class="panel">
+          <div class="ph"><div class="ph-title">VENTAS POR MES</div></div>
+          <div class="pb" id="reportVentasMes"></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="ph-title">TOP PRODUCTOS VENDIDOS</div></div>
+          <div class="pb" id="reportTopProd"></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="ph-title">ENTRADAS DE STOCK</div></div>
+          <div class="pb" id="reportEntradas"></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="ph-title">SALIDAS DE STOCK</div></div>
+          <div class="pb" id="reportSalidas"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- MODALES -->
+<!-- Add Stock Item -->
+<div class="moverlay" id="modalAddStock" onclick="if(event.target===this)closeModal('modalAddStock')">
+  <div class="mbox">
+    <div class="mhead"><div class="mhead-title" id="stockModalTitle">AGREGAR ÍTEM DE STOCK</div><button class="mclose" onclick="closeModal('modalAddStock')">✕</button></div>
+    <div class="mbody">
+      <input type="hidden" id="stockEditId">
+      <div class="fg">
+        <div class="fgroup"><label class="fl">Código / SKU</label><input class="fi" type="text" id="stCod" placeholder="SKU001"></div>
+        <div class="fgroup"><label class="fl">Categoría</label><input class="fi" type="text" id="stCatI" placeholder="Electrónica"></div>
+        <div class="fgroup s2"><label class="fl">Nombre del producto *</label><input class="fi" type="text" id="stNom" placeholder="Auricular Bluetooth Pro"></div>
+        <div class="fgroup s2"><label class="fl">Descripción</label><textarea class="fi" id="stDesc" rows="2"></textarea></div>
+        <div class="fgroup"><label class="fl">Stock actual</label><input class="fi" type="number" id="stQty" value="0" min="0"></div>
+        <div class="fgroup"><label class="fl">Stock mínimo</label><input class="fi" type="number" id="stMin" value="5" min="0"></div>
+        <div class="fgroup"><label class="fl">Precio costo (Gs.)</label><input class="fi" type="text" id="stCosto" placeholder="100.000"></div>
+        <div class="fgroup"><label class="fl">Precio venta (Gs.)</label><input class="fi" type="text" id="stVenta" placeholder="150.000"></div>
+        <div class="fgroup"><label class="fl">Proveedor</label><select class="fi" id="stProv"><option value="">Sin asignar</option></select></div>
+        <div class="fgroup"><label class="fl">Ubicación</label><input class="fi" type="text" id="stUbic" placeholder="Estante A-1"></div>
+      </div>
+      <div style="display:flex;gap:.8rem;margin-top:1rem"><button class="btn btn-y" onclick="saveStockItem()">💾 Guardar</button><button class="btn btn-ghost" onclick="closeModal('modalAddStock')">Cancelar</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Movement -->
+<div class="moverlay" id="modalAddMov" onclick="if(event.target===this)closeModal('modalAddMov')">
+  <div class="mbox">
+    <div class="mhead"><div class="mhead-title">REGISTRAR MOVIMIENTO</div><button class="mclose" onclick="closeModal('modalAddMov')">✕</button></div>
+    <div class="mbody">
+      <div class="fg">
+        <div class="fgroup"><label class="fl">Tipo *</label><select class="fi" id="movType"><option value="entrada">📥 Entrada</option><option value="salida">📤 Salida</option><option value="ajuste">⚖ Ajuste</option></select></div>
+        <div class="fgroup"><label class="fl">Fecha *</label><input class="fi" type="date" id="movDate"></div>
+        <div class="fgroup s2"><label class="fl">Producto *</label><select class="fi" id="movProd"><option value="">Seleccionar...</option></select></div>
+        <div class="fgroup"><label class="fl">Cantidad *</label><input class="fi" type="number" id="movQty" min="1" value="1"></div>
+        <div class="fgroup"><label class="fl">Precio unitario (Gs.)</label><input class="fi" type="text" id="movPrice" placeholder="150.000"></div>
+        <div class="fgroup"><label class="fl">Proveedor / Cliente</label><input class="fi" type="text" id="movContact" placeholder="Nombre..."></div>
+        <div class="fgroup"><label class="fl">Referencia</label><input class="fi" type="text" id="movRef" placeholder="Factura, orden, etc."></div>
+        <div class="fgroup s2"><label class="fl">Notas</label><textarea class="fi" id="movNotes" rows="2"></textarea></div>
+      </div>
+      <div style="display:flex;gap:.8rem;margin-top:1rem"><button class="btn btn-y" onclick="saveMov()">💾 Registrar</button><button class="btn btn-ghost" onclick="closeModal('modalAddMov')">Cancelar</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Client -->
+<div class="moverlay" id="modalAddClient" onclick="if(event.target===this)closeModal('modalAddClient')">
+  <div class="mbox">
+    <div class="mhead"><div class="mhead-title" id="clientModalTitle">AGREGAR CLIENTE</div><button class="mclose" onclick="closeModal('modalAddClient')">✕</button></div>
+    <div class="mbody">
+      <input type="hidden" id="clientEditId">
+      <div class="fg">
+        <div class="fgroup"><label class="fl">RUC / Cédula *</label><input class="fi" type="text" id="cRuc" placeholder="80123456-7"></div>
+        <div class="fgroup"><label class="fl">Tipo</label><select class="fi" id="cTipo"><option>Persona Física</option><option>Empresa</option></select></div>
+        <div class="fgroup s2"><label class="fl">Nombre / Razón Social *</label><input class="fi" type="text" id="cNom"></div>
+        <div class="fgroup"><label class="fl">Email</label><input class="fi" type="email" id="cEmail"></div>
+        <div class="fgroup"><label class="fl">Teléfono</label><input class="fi" type="text" id="cTel" placeholder="0981 000 000"></div>
+        <div class="fgroup"><label class="fl">Ciudad</label><input class="fi" type="text" id="cCiudad" placeholder="Asunción"></div>
+        <div class="fgroup"><label class="fl">Dirección</label><input class="fi" type="text" id="cDir"></div>
+        <div class="fgroup"><label class="fl">Límite de crédito (Gs.)</label><input class="fi" type="text" id="cCredito" placeholder="0"></div>
+        <div class="fgroup s2"><label class="fl">Notas</label><textarea class="fi" id="cNotes" rows="2"></textarea></div>
+      </div>
+      <div style="display:flex;gap:.8rem;margin-top:1rem"><button class="btn btn-y" onclick="saveClient()">💾 Guardar</button><button class="btn btn-ghost" onclick="closeModal('modalAddClient')">Cancelar</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Provider -->
+<div class="moverlay" id="modalAddProv" onclick="if(event.target===this)closeModal('modalAddProv')">
+  <div class="mbox">
+    <div class="mhead"><div class="mhead-title" id="provModalTitle">AGREGAR PROVEEDOR</div><button class="mclose" onclick="closeModal('modalAddProv')">✕</button></div>
+    <div class="mbody">
+      <input type="hidden" id="provEditId">
+      <div class="fg">
+        <div class="fgroup"><label class="fl">RUC *</label><input class="fi" type="text" id="pRuc"></div>
+        <div class="fgroup"><label class="fl">Razón Social *</label><input class="fi" type="text" id="pNom"></div>
+        <div class="fgroup"><label class="fl">Contacto</label><input class="fi" type="text" id="pContact"></div>
+        <div class="fgroup"><label class="fl">Teléfono</label><input class="fi" type="text" id="pTel"></div>
+        <div class="fgroup"><label class="fl">Email</label><input class="fi" type="email" id="pEmail"></div>
+        <div class="fgroup"><label class="fl">Ciudad</label><input class="fi" type="text" id="pCiudad" placeholder="Asunción"></div>
+        <div class="fgroup"><label class="fl">Dirección</label><input class="fi" type="text" id="pDir"></div>
+        <div class="fgroup"><label class="fl">Banco / Cuenta</label><input class="fi" type="text" id="pBanco"></div>
+        <div class="fgroup s2"><label class="fl">Notas</label><textarea class="fi" id="pNotes" rows="2"></textarea></div>
+      </div>
+      <div style="display:flex;gap:.8rem;margin-top:1rem"><button class="btn btn-y" onclick="saveProv()">💾 Guardar</button><button class="btn btn-ghost" onclick="closeModal('modalAddProv')">Cancelar</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- PRINT / PREVIEW AREA -->
+<div id="printOverlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.92);overflow-y:auto;padding:20px">
+  <div style="max-width:820px;margin:0 auto">
+    <div class="no-print" style="display:flex;gap:.8rem;margin-bottom:1.2rem">
+      <button class="btn btn-g" onclick="window.print()">🖨 Imprimir</button>
+      <button class="btn btn-b no-print" onclick="exportPDF()">⬇ Exportar PDF</button>
+      <button class="btn btn-ghost" onclick="closePrint()">✕ Cerrar</button>
+    </div>
+    <div id="printContent"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════
+// STORAGE
+// ═══════════════════════════════
+const LS = 'popy_sistema';
+let SYS = loadSys();
+
+function loadSys(){
+  try{ return JSON.parse(localStorage.getItem(LS)) || defaultSys(); }
+  catch(e){ return defaultSys(); }
+}
+function saveSys(){ localStorage.setItem(LS, JSON.stringify(SYS)); }
+
+function defaultSys(){
+  return {
+    stock:[],
+    movimientos:[],
+    clientes:[],
+    proveedores:[],
+    presupuestos:[],
+    facturas:[],
+    recibos:[],
+    config:{ empresa:'Power One Py', ruc:'80000000-0', tel:'595981570126', email:'info@poweronepy.com', ciudad:'Asunción, Paraguay', dir:'Asunción, Paraguay', facNro:1, recNro:1, presNro:1 }
+  };
+}
+
+// ═══════════════════════════════
+// INIT
+// ═══════════════════════════════
+window.addEventListener('load', ()=>{
+  document.getElementById('todayDate').textContent = new Date().toLocaleDateString('es-PY',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+  const today = new Date().toISOString().split('T')[0];
+  ['movDate','facDate','recDate'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=today; });
+  // Set default valid until (30 days)
+  const valid = new Date(); valid.setDate(valid.getDate()+30);
+  document.getElementById('presValid').value = valid.toISOString().split('T')[0];
+  goPage('dashboard');
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') document.querySelectorAll('.moverlay.open').forEach(m=>m.classList.remove('open')); });
+});
+
+// ═══════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════
+const PAGES_MAP = { dashboard:'Dashboard', stock:'Stock / Inventario', movimientos:'Movimientos', clientes:'Clientes', proveedores:'Proveedores', presupuestos:'Presupuestos', facturas:'Facturas', recibos:'Recibos', reportes:'Reportería' };
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const pg = document.getElementById('page'+id.charAt(0).toUpperCase()+id.slice(1));
+  if(pg) pg.classList.add('active');
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>{ if(n.textContent.trim().toLowerCase().includes(id.toLowerCase().substring(0,5))) n.classList.add('active'); });
+  document.getElementById('pageTitle').textContent = (PAGES_MAP[id]||id).toUpperCase();
+  const renders = { dashboard:renderDashboard, stock:renderStock, movimientos:renderMovs, clientes:renderClients, proveedores:renderProvs, presupuestos:()=>{renderPresHistory();populateSelects();initPresItems();}, facturas:()=>{renderFacHistory();populateSelects();initFacItems();}, recibos:()=>{renderRecHistory();populateSelects();}, reportes:renderReportes };
+  if(renders[id]) renders[id]();
+}
+
+// ═══════════════════════════════
+// MODALS
+// ═══════════════════════════════
+function openModal(id){ document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+
+// ═══════════════════════════════
+// HELPERS
+// ═══════════════════════════════
+function gs(n){ return Number(String(n).replace(/\./g,'').replace(/,/g,'.'))||0; }
+function fmtGs(n){ return (n||0).toLocaleString('de-DE')+' Gs.'; }
+function fmtDate(d){ if(!d) return '—'; try{ return new Date(d+'T12:00').toLocaleDateString('es-PY'); }catch(e){return d;} }
+function tid(){ return Date.now(); }
+function showToast(msg,err=false){const t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(err?' err':'')+' show';clearTimeout(t._t);t._t=setTimeout(()=>t.className='toast',3200);}
+function emptyMsg(msg){ return `<div style="text-align:center;padding:2rem;color:rgba(255,255,255,.2);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:.88rem">${msg}</div>`; }
+function populateSelects(){
+  // clients
+  ['presClient','facClient','recClient'].forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    const first = id==='presClient'?'<option value="">Sin cliente / Walk-in</option>':'<option value="">Consumidor Final</option>';
+    el.innerHTML=first+(SYS.clientes||[]).map(c=>`<option value="${c.id}">${c.nombre} (${c.ruc})</option>`).join('');
+  });
+  // providers
+  ['stProv'].forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    el.innerHTML='<option value="">Sin asignar</option>'+(SYS.proveedores||[]).map(p=>`<option value="${p.id}">${p.nombre}</option>`).join('');
+  });
+  // products for mov
+  const mp=document.getElementById('movProd'); if(mp) mp.innerHTML='<option value="">Seleccionar...</option>'+(SYS.stock||[]).map(s=>`<option value="${s.id}">${s.nombre} [${s.cod||'—'}]</option>`).join('');
+  // stock cat filter
+  const cf=document.getElementById('stockCatFilter'); if(cf){ const cats=[...new Set((SYS.stock||[]).map(s=>s.cat).filter(Boolean))]; cf.innerHTML='<option value="">Todas las categorías</option>'+cats.map(c=>`<option>${c}</option>`).join('');}
+}
+
+// ═══════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════
+function renderDashboard(){
+  const totFac = (SYS.facturas||[]).reduce((a,f)=>a+f.total,0);
+  const lowStock = (SYS.stock||[]).filter(s=>s.qty<=s.minQty);
+  document.getElementById('dashStats').innerHTML=`
+    <div class="sc yellow"><div class="sc-num">${(SYS.stock||[]).length}</div><div class="sc-label">Ítems en stock</div></div>
+    <div class="sc red"><div class="sc-num">${lowStock.length}</div><div class="sc-label">Stock bajo</div></div>
+    <div class="sc green"><div class="sc-num">${(SYS.facturas||[]).length}</div><div class="sc-label">Facturas</div></div>
+    <div class="sc blue"><div class="sc-num">${(SYS.clientes||[]).length}</div><div class="sc-label">Clientes</div></div>`;
+  // Last movements
+  const movs=[...(SYS.movimientos||[])].reverse().slice(0,8);
+  document.getElementById('dashMovs').innerHTML=movs.length
+    ?movs.map(m=>`<div style="display:flex;justify-content:space-between;padding:.55rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.84rem"><span class="${m.tipo==='entrada'?'mov-in':'mov-out'}">${m.tipo==='entrada'?'↑':'↓'} ${m.prod}</span><span style="color:rgba(255,255,255,.4)">${fmtDate(m.fecha)} · ${m.qty} u.</span></div>`).join('')
+    :emptyMsg('Sin movimientos');
+  // Low stock
+  document.getElementById('dashLowStock').innerHTML=lowStock.length
+    ?lowStock.map(s=>`<div style="display:flex;justify-content:space-between;padding:.55rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.84rem"><span>${s.nombre}</span><span class="${s.qty===0?'badge badge-r':'badge badge-y'}">${s.qty} / ${s.minQty}</span></div>`).join('')
+    :emptyMsg('Todos OK ✓');
+  // Summaries
+  const lastFac=[...(SYS.facturas||[])].reverse().slice(0,4);
+  document.getElementById('dashFacturas').innerHTML=lastFac.length?lastFac.map(f=>`<div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem"><span>${f.num||'—'}</span><span style="color:var(--y)">${fmtGs(f.total)}</span></div>`).join(''):emptyMsg('Sin facturas');
+  const lastPres=[...(SYS.presupuestos||[])].reverse().slice(0,4);
+  document.getElementById('dashPresupuestos').innerHTML=lastPres.length?lastPres.map(p=>`<div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem"><span>Pres. #${p.num}</span><span style="color:var(--y)">${fmtGs(p.total)}</span></div>`).join(''):emptyMsg('Sin presupuestos');
+  const lastCli=[...(SYS.clientes||[])].reverse().slice(0,4);
+  document.getElementById('dashClientes').innerHTML=lastCli.length?lastCli.map(c=>`<div style="padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem">${c.nombre}</div>`).join(''):emptyMsg('Sin clientes');
+}
+
+// ═══════════════════════════════
+// STOCK
+// ═══════════════════════════════
+function renderStock(){
+  populateSelects();
+  const q=(document.getElementById('stockSearch').value||'').toLowerCase();
+  const cf=(document.getElementById('stockCatFilter').value||'');
+  let list=SYS.stock||[];
+  if(q) list=list.filter(s=>(s.nombre+s.cod+s.cat).toLowerCase().includes(q));
+  if(cf) list=list.filter(s=>s.cat===cf);
+  document.getElementById('stockCount').textContent=list.length;
+  const bar=(s)=>{const pct=Math.min(100,s.minQty>0?Math.round(s.qty/s.minQty*50):50);const col=s.qty===0?'#ff4d4d':s.qty<=s.minQty?'#FFD600':'#4caf50';return`<div class="stock-bar-wrap"><div class="stock-bar" style="width:${pct}%;background:${col}"></div></div> ${s.qty}`;};
+  document.getElementById('stockBody').innerHTML=list.length?list.map(s=>`<tr>
+    <td><code style="color:var(--y);font-size:.8rem">${s.cod||'—'}</code></td>
+    <td><strong>${s.nombre}</strong><div style="font-size:.75rem;color:rgba(255,255,255,.3)">${s.desc||''}</div></td>
+    <td><span class="badge badge-b">${s.cat||'—'}</span></td>
+    <td>${bar(s)}</td><td>${s.minQty}</td>
+    <td>${s.costo?fmtGs(gs(s.costo)):'—'}</td><td style="color:var(--y)">${s.venta?fmtGs(gs(s.venta)):'—'}</td>
+    <td style="font-size:.8rem;color:rgba(255,255,255,.4)">${s.ubicacion||'—'}</td>
+    <td><div class="actions"><button class="btn btn-ghost btn-sm" onclick="editStockItem(${s.id})">✏</button><button class="btn btn-r btn-sm" onclick="deleteStockItem(${s.id})">🗑</button></div></td>
+  </tr>`).join(''):`<tr><td colspan="9" style="text-align:center;padding:2rem;color:rgba(255,255,255,.25)">Sin ítems. Agregá uno arriba.</td></tr>`;
+}
+function saveStockItem(){
+  const cod=document.getElementById('stCod').value.trim(),nombre=document.getElementById('stNom').value.trim(),cat=document.getElementById('stCatI').value.trim(),desc=document.getElementById('stDesc').value.trim();
+  if(!nombre){showToast('Ingresá el nombre',true);return;}
+  const qty=parseInt(document.getElementById('stQty').value)||0,minQty=parseInt(document.getElementById('stMin').value)||0;
+  const costo=document.getElementById('stCosto').value.trim(),venta=document.getElementById('stVenta').value.trim(),prov=document.getElementById('stProv').value,ubicacion=document.getElementById('stUbic').value.trim();
+  const editId=document.getElementById('stockEditId').value;
+  if(editId){const idx=SYS.stock.findIndex(s=>s.id==editId);if(idx>-1)SYS.stock[idx]={...SYS.stock[idx],cod,nombre,cat,desc,qty,minQty,costo,venta,prov,ubicacion};}
+  else{SYS.stock.push({id:tid(),cod,nombre,cat,desc,qty,minQty,costo,venta,prov,ubicacion});}
+  saveSys();closeModal('modalAddStock');renderStock();showToast('✅ Guardado');
+}
+function editStockItem(id){
+  const s=SYS.stock.find(x=>x.id==id);if(!s)return;
+  document.getElementById('stockModalTitle').textContent='EDITAR ÍTEM';
+  document.getElementById('stockEditId').value=s.id;
+  document.getElementById('stCod').value=s.cod||'';document.getElementById('stNom').value=s.nombre;document.getElementById('stCatI').value=s.cat||'';document.getElementById('stDesc').value=s.desc||'';
+  document.getElementById('stQty').value=s.qty;document.getElementById('stMin').value=s.minQty;document.getElementById('stCosto').value=s.costo||'';document.getElementById('stVenta').value=s.venta||'';
+  document.getElementById('stUbic').value=s.ubicacion||'';
+  openModal('modalAddStock');
+}
+function deleteStockItem(id){if(!confirm('¿Eliminar?'))return;SYS.stock=SYS.stock.filter(s=>s.id!=id);saveSys();renderStock();showToast('🗑 Eliminado');}
+
+// ═══════════════════════════════
+// MOVIMIENTOS
+// ═══════════════════════════════
+function renderMovs(){
+  const tf=document.getElementById('movTypeFilter').value;
+  const df=document.getElementById('movDateFrom').value;
+  const dt=document.getElementById('movDateTo').value;
+  let list=[...(SYS.movimientos||[])].reverse();
+  if(tf)list=list.filter(m=>m.tipo===tf);
+  if(df)list=list.filter(m=>m.fecha>=df);
+  if(dt)list=list.filter(m=>m.fecha<=dt);
+  document.getElementById('movBody').innerHTML=list.length?list.map(m=>`<tr>
+    <td>${fmtDate(m.fecha)}</td>
+    <td><span class="badge ${m.tipo==='entrada'?'badge-g':m.tipo==='salida'?'badge-r':'badge-y'}">${m.tipo}</span></td>
+    <td>${m.prod}</td><td class="${m.tipo==='entrada'?'mov-in':'mov-out'}">${m.tipo==='ajuste'?'':m.tipo==='entrada'?'+':'−'}${m.qty}</td>
+    <td>${m.precio?fmtGs(gs(m.precio)):'—'}</td><td style="color:var(--y)">${m.precio?fmtGs(gs(m.precio)*m.qty):'—'}</td>
+    <td>${m.contacto||'—'}</td><td style="font-size:.8rem;color:rgba(255,255,255,.4)">${m.ref||'—'}</td>
+    <td style="font-size:.8rem;color:rgba(255,255,255,.4)">${m.notas||''}</td>
+  </tr>`).join(''):`<tr><td colspan="9" style="text-align:center;padding:2rem;color:rgba(255,255,255,.25)">Sin movimientos registrados.</td></tr>`;
+}
+function saveMov(){
+  const prod=document.getElementById('movProd').value;
+  if(!prod){showToast('Seleccioná un producto',true);return;}
+  const s=SYS.stock.find(x=>x.id==prod);
+  const qty=parseInt(document.getElementById('movQty').value)||1;
+  const tipo=document.getElementById('movType').value;
+  const fecha=document.getElementById('movDate').value||new Date().toISOString().split('T')[0];
+  SYS.movimientos.push({id:tid(),tipo,fecha,prod:s?s.nombre:'?',prodId:prod,qty,precio:document.getElementById('movPrice').value.trim(),contacto:document.getElementById('movContact').value.trim(),ref:document.getElementById('movRef').value.trim(),notas:document.getElementById('movNotes').value.trim()});
+  // Update stock
+  if(s){if(tipo==='entrada')s.qty+=qty;else if(tipo==='salida')s.qty=Math.max(0,s.qty-qty);else s.qty=qty;}
+  saveSys();closeModal('modalAddMov');renderMovs();showToast('✅ Movimiento registrado');
+}
+
+// ═══════════════════════════════
+// CLIENTES
+// ═══════════════════════════════
+function renderClients(){
+  const q=(document.getElementById('clientSearch').value||'').toLowerCase();
+  let list=SYS.clientes||[];
+  if(q)list=list.filter(c=>(c.nombre+c.ruc+c.email).toLowerCase().includes(q));
+  document.getElementById('clientCount').textContent=list.length;
+  const totalCompras=c=>(SYS.facturas||[]).filter(f=>f.clienteId==c.id).reduce((a,f)=>a+f.total,0);
+  const cntFac=c=>(SYS.facturas||[]).filter(f=>f.clienteId==c.id).length;
+  document.getElementById('clientBody').innerHTML=list.length?list.map(c=>`<tr>
+    <td><code style="color:var(--y);font-size:.8rem">${c.ruc||'—'}</code></td>
+    <td><strong>${c.nombre}</strong><div style="font-size:.75rem;color:rgba(255,255,255,.3)">${c.tipo}</div></td>
+    <td>${c.email||'—'}</td><td>${c.tel||'—'}</td><td>${c.ciudad||'—'}</td>
+    <td><span class="badge badge-b">${cntFac(c)}</span></td>
+    <td style="color:var(--y)">${fmtGs(totalCompras(c))}</td>
+    <td><div class="actions"><button class="btn btn-ghost btn-sm" onclick="editClient(${c.id})">✏</button><button class="btn btn-r btn-sm" onclick="deleteClient(${c.id})">🗑</button></div></td>
+  </tr>`).join(''):`<tr><td colspan="8" style="text-align:center;padding:2rem;color:rgba(255,255,255,.25)">Sin clientes. Agregá uno.</td></tr>`;
+}
+function saveClient(){
+  const nombre=document.getElementById('cNom').value.trim(),ruc=document.getElementById('cRuc').value.trim();
+  if(!nombre){showToast('Nombre obligatorio',true);return;}
+  const data={id:document.getElementById('clientEditId').value||tid(),nombre,ruc,tipo:document.getElementById('cTipo').value,email:document.getElementById('cEmail').value.trim(),tel:document.getElementById('cTel').value.trim(),ciudad:document.getElementById('cCiudad').value.trim(),dir:document.getElementById('cDir').value.trim(),credito:document.getElementById('cCredito').value.trim(),notas:document.getElementById('cNotes').value.trim()};
+  const editId=document.getElementById('clientEditId').value;
+  if(editId){const idx=SYS.clientes.findIndex(c=>c.id==editId);if(idx>-1)SYS.clientes[idx]=data;}
+  else{SYS.clientes.push(data);}
+  saveSys();closeModal('modalAddClient');renderClients();showToast('✅ Cliente guardado');
+  ['cRuc','cNom','cEmail','cTel','cCiudad','cDir','cCredito','cNotes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('clientEditId').value='';
+}
+function editClient(id){
+  const c=SYS.clientes.find(x=>x.id==id);if(!c)return;
+  document.getElementById('clientModalTitle').textContent='EDITAR CLIENTE';
+  document.getElementById('clientEditId').value=c.id;document.getElementById('cRuc').value=c.ruc||'';document.getElementById('cNom').value=c.nombre;
+  document.getElementById('cTipo').value=c.tipo||'Persona Física';document.getElementById('cEmail').value=c.email||'';document.getElementById('cTel').value=c.tel||'';
+  document.getElementById('cCiudad').value=c.ciudad||'';document.getElementById('cDir').value=c.dir||'';document.getElementById('cCredito').value=c.credito||'';document.getElementById('cNotes').value=c.notas||'';
+  openModal('modalAddClient');
+}
+function deleteClient(id){if(!confirm('¿Eliminar cliente?'))return;SYS.clientes=SYS.clientes.filter(c=>c.id!=id);saveSys();renderClients();showToast('🗑 Eliminado');}
+
+// ═══════════════════════════════
+// PROVEEDORES
+// ═══════════════════════════════
+function renderProvs(){
+  const q=(document.getElementById('provSearch').value||'').toLowerCase();
+  let list=SYS.proveedores||[];
+  if(q)list=list.filter(p=>(p.nombre+p.ruc).toLowerCase().includes(q));
+  document.getElementById('provCount').textContent=list.length;
+  document.getElementById('provBody').innerHTML=list.length?list.map(p=>`<tr>
+    <td><code style="color:var(--y);font-size:.8rem">${p.ruc||'—'}</code></td>
+    <td><strong>${p.nombre}</strong></td><td>${p.contacto||'—'}</td><td>${p.tel||'—'}</td><td>${p.email||'—'}</td><td>${p.ciudad||'—'}</td><td style="font-size:.8rem;color:rgba(255,255,255,.4)">${p.banco||'—'}</td>
+    <td><div class="actions"><button class="btn btn-ghost btn-sm" onclick="editProv(${p.id})">✏</button><button class="btn btn-r btn-sm" onclick="deleteProv(${p.id})">🗑</button></div></td>
+  </tr>`).join(''):`<tr><td colspan="8" style="text-align:center;padding:2rem;color:rgba(255,255,255,.25)">Sin proveedores.</td></tr>`;
+}
+function saveProv(){
+  const nombre=document.getElementById('pNom').value.trim(),ruc=document.getElementById('pRuc').value.trim();
+  if(!nombre){showToast('Nombre obligatorio',true);return;}
+  const data={id:document.getElementById('provEditId').value||tid(),nombre,ruc,contacto:document.getElementById('pContact').value.trim(),tel:document.getElementById('pTel').value.trim(),email:document.getElementById('pEmail').value.trim(),ciudad:document.getElementById('pCiudad').value.trim(),dir:document.getElementById('pDir').value.trim(),banco:document.getElementById('pBanco').value.trim(),notas:document.getElementById('pNotes').value.trim()};
+  const editId=document.getElementById('provEditId').value;
+  if(editId){const idx=SYS.proveedores.findIndex(p=>p.id==editId);if(idx>-1)SYS.proveedores[idx]=data;}
+  else SYS.proveedores.push(data);
+  saveSys();closeModal('modalAddProv');renderProvs();showToast('✅ Proveedor guardado');
+  document.getElementById('provEditId').value='';
+}
+function editProv(id){
+  const p=SYS.proveedores.find(x=>x.id==id);if(!p)return;
+  document.getElementById('provModalTitle').textContent='EDITAR PROVEEDOR';
+  document.getElementById('provEditId').value=p.id;document.getElementById('pRuc').value=p.ruc||'';document.getElementById('pNom').value=p.nombre;
+  document.getElementById('pContact').value=p.contacto||'';document.getElementById('pTel').value=p.tel||'';document.getElementById('pEmail').value=p.email||'';
+  document.getElementById('pCiudad').value=p.ciudad||'';document.getElementById('pDir').value=p.dir||'';document.getElementById('pBanco').value=p.banco||'';document.getElementById('pNotes').value=p.notas||'';
+  openModal('modalAddProv');
+}
+function deleteProv(id){if(!confirm('¿Eliminar proveedor?'))return;SYS.proveedores=SYS.proveedores.filter(p=>p.id!=id);saveSys();renderProvs();showToast('🗑 Eliminado');}
+
+// ═══════════════════════════════
+// PRESUPUESTOS — Items
+// ═══════════════════════════════
+let presItems=[];
+function initPresItems(){if(!presItems.length)presItems=[{desc:'',qty:1,precio:'',subtotal:0}];renderPresItems();}
+function addPresItem(){presItems.push({desc:'',qty:1,precio:'',subtotal:0});renderPresItems();}
+function removePresItem(i){presItems.splice(i,1);if(!presItems.length)presItems=[{desc:'',qty:1,precio:'',subtotal:0}];renderPresItems();}
+function updatePresItem(i,field,val){presItems[i][field]=val;if(field==='qty'||field==='precio'){const q=parseFloat(presItems[i].qty)||0;const p=gs(presItems[i].precio);presItems[i].subtotal=q*p;}renderPresTotal();}
+function renderPresItems(){
+  document.getElementById('presItems').innerHTML=`
+    <div class="pres-item-row" style="font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem">
+      <span>Descripción</span><span>Cant.</span><span>Precio Unit.</span><span>Subtotal</span><span></span>
+    </div>`+
+  presItems.map((it,i)=>`<div class="pres-item-row">
+    <input class="fi" type="text" value="${it.desc}" placeholder="Producto/servicio..." oninput="updatePresItem(${i},'desc',this.value)">
+    <input class="fi" type="number" value="${it.qty}" min="1" oninput="updatePresItem(${i},'qty',this.value)" style="text-align:center">
+    <input class="fi" type="text" value="${it.precio}" placeholder="0" oninput="updatePresItem(${i},'precio',this.value)">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--y);padding:9px 4px">${fmtGs(it.subtotal)}</div>
+    <button class="btn btn-r btn-sm" onclick="removePresItem(${i})" style="padding:5px 8px">✕</button>
+  </div>`).join('');
+  renderPresTotal();
+}
+function renderPresTotal(){
+  const total=presItems.reduce((a,it)=>a+(it.subtotal||0),0);
+  document.getElementById('presTotalDisplay').textContent=fmtGs(total);
+}
+function clearPres(){presItems=[{desc:'',qty:1,precio:'',subtotal:0}];document.getElementById('presClient').value='';document.getElementById('presNotes').value='';document.getElementById('presFormTitle').textContent='NUEVO PRESUPUESTO';const v=new Date();v.setDate(v.getDate()+30);document.getElementById('presValid').value=v.toISOString().split('T')[0];renderPresItems();}
+function savePresupuesto(){
+  const total=presItems.reduce((a,it)=>a+(it.subtotal||0),0);
+  const num=SYS.config.presNro++;
+  const clienteId=document.getElementById('presClient').value;
+  const cliente=SYS.clientes.find(c=>c.id==clienteId);
+  SYS.presupuestos.push({id:tid(),num,fecha:new Date().toISOString().split('T')[0],clienteId,clienteNom:cliente?cliente.nombre:'Sin cliente',items:[...presItems],total,notas:document.getElementById('presNotes').value,validHasta:document.getElementById('presValid').value,estado:'vigente'});
+  saveSys();renderPresHistory();showToast(`✅ Presupuesto #${num} guardado`);
+}
+function renderPresHistory(){
+  const list=[...(SYS.presupuestos||[])].reverse();
+  document.getElementById('presHistory').innerHTML=list.length?list.map(p=>`<div style="padding:.9rem;border-bottom:1px solid rgba(255,255,255,.05)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem">Pres. #${p.num}</span>
+      <span style="color:var(--y);font-family:'Bebas Neue',sans-serif;font-size:1.1rem">${fmtGs(p.total)}</span>
+    </div>
+    <div style="font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:.5rem">${p.clienteNom} · ${fmtDate(p.fecha)}</div>
+    <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+      <button class="btn btn-b btn-sm" onclick="previewDocFromData('presupuesto',${p.id})">👁</button>
+      <button class="btn btn-g btn-sm" onclick="exportPresFromData(${p.id})">PDF</button>
+      <button class="btn btn-r btn-sm" onclick="deletePres(${p.id})">🗑</button>
+    </div>
+  </div>`).join(''):emptyMsg('Sin presupuestos');
+}
+function deletePres(id){if(!confirm('¿Eliminar?'))return;SYS.presupuestos=SYS.presupuestos.filter(p=>p.id!=id);saveSys();renderPresHistory();showToast('🗑 Eliminado');}
+
+// ═══════════════════════════════
+// FACTURAS
+// ═══════════════════════════════
+let facItems=[];
+function initFacItems(){if(!facItems.length)facItems=[{desc:'',qty:1,precio:'',subtotal:0}];renderFacItems();}
+function addFacItem(){facItems.push({desc:'',qty:1,precio:'',subtotal:0});renderFacItems();}
+function removeFacItem(i){facItems.splice(i,1);if(!facItems.length)facItems=[{desc:'',qty:1,precio:'',subtotal:0}];renderFacItems();}
+function updateFacItem(i,field,val){facItems[i][field]=val;if(field==='qty'||field==='precio'){const q=parseFloat(facItems[i].qty)||0;const p=gs(facItems[i].precio);facItems[i].subtotal=q*p;}renderFacTotal();}
+function renderFacItems(){
+  document.getElementById('facItems').innerHTML=`
+    <div class="pres-item-row" style="font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem">
+      <span>Descripción</span><span>Cant.</span><span>Precio Unit.</span><span>Subtotal</span><span></span>
+    </div>`+
+  facItems.map((it,i)=>`<div class="pres-item-row">
+    <input class="fi" type="text" value="${it.desc}" placeholder="Producto/servicio..." oninput="updateFacItem(${i},'desc',this.value)">
+    <input class="fi" type="number" value="${it.qty}" min="1" oninput="updateFacItem(${i},'qty',this.value)" style="text-align:center">
+    <input class="fi" type="text" value="${it.precio}" placeholder="0" oninput="updateFacItem(${i},'precio',this.value)">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--y);padding:9px 4px">${fmtGs(it.subtotal)}</div>
+    <button class="btn btn-r btn-sm" onclick="removeFacItem(${i})" style="padding:5px 8px">✕</button>
+  </div>`).join('');
+  renderFacTotal();
+}
+function renderFacTotal(){const total=facItems.reduce((a,it)=>a+(it.subtotal||0),0);document.getElementById('facTotalDisplay').textContent=fmtGs(total);}
+function clearFac(){facItems=[{desc:'',qty:1,precio:'',subtotal:0}];document.getElementById('facClient').value='';document.getElementById('facNotes').value='';document.getElementById('facDate').value=new Date().toISOString().split('T')[0];document.getElementById('facNum').value='';document.getElementById('facFormTitle').textContent='NUEVA FACTURA';renderFacItems();}
+function saveFactura(){
+  const total=facItems.reduce((a,it)=>a+(it.subtotal||0),0);
+  const num=SYS.config.facNro++;
+  const clienteId=document.getElementById('facClient').value;
+  const cliente=SYS.clientes.find(c=>c.id==clienteId);
+  const facNumVal=document.getElementById('facNum').value.trim()||`001-001-${String(num).padStart(7,'0')}`;
+  SYS.facturas.push({id:tid(),num:facNumVal,numInt:num,fecha:document.getElementById('facDate').value,clienteId,clienteNom:cliente?cliente.nombre:'Consumidor Final',clienteRuc:cliente?cliente.ruc:'—',items:[...facItems],total,notas:document.getElementById('facNotes').value,pago:document.getElementById('facPago').value});
+  saveSys();renderFacHistory();showToast(`✅ Factura ${facNumVal} guardada`);
+}
+function renderFacHistory(){
+  const list=[...(SYS.facturas||[])].reverse();
+  document.getElementById('facHistory').innerHTML=list.length?list.map(f=>`<div style="padding:.9rem;border-bottom:1px solid rgba(255,255,255,.05)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem">${f.num}</span>
+      <span style="color:var(--y);font-family:'Bebas Neue',sans-serif;font-size:1.1rem">${fmtGs(f.total)}</span>
+    </div>
+    <div style="font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:.5rem">${f.clienteNom} · ${fmtDate(f.fecha)}</div>
+    <div style="display:flex;gap:.4rem">
+      <button class="btn btn-b btn-sm" onclick="previewDocFromData('factura',${f.id})">👁</button>
+      <button class="btn btn-g btn-sm" onclick="printDocFromData('factura',${f.id})">🖨</button>
+      <button class="btn btn-r btn-sm" onclick="deleteFac(${f.id})">🗑</button>
+    </div>
+  </div>`).join(''):emptyMsg('Sin facturas');
+}
+function deleteFac(id){if(!confirm('¿Eliminar factura?'))return;SYS.facturas=SYS.facturas.filter(f=>f.id!=id);saveSys();renderFacHistory();showToast('🗑 Eliminada');}
+
+// ═══════════════════════════════
+// RECIBOS
+// ═══════════════════════════════
+function clearRec(){['recName','recMonto','recConcepto','recRef'].forEach(id=>document.getElementById(id).value='');document.getElementById('recDate').value=new Date().toISOString().split('T')[0];document.getElementById('recNum').value='';document.getElementById('recTotalDisplay').textContent='Gs. 0';}
+function updateRecTotal(){const v=gs(document.getElementById('recMonto').value);document.getElementById('recTotalDisplay').textContent=fmtGs(v);}
+function saveRecibo(){
+  const monto=gs(document.getElementById('recMonto').value);const concepto=document.getElementById('recConcepto').value.trim();
+  if(!concepto){showToast('El concepto es obligatorio',true);return;}
+  const num=SYS.config.recNro++;
+  const clienteId=document.getElementById('recClient').value;
+  const cliente=SYS.clientes.find(c=>c.id==clienteId);
+  const nombre=document.getElementById('recName').value.trim()||cliente?.nombre||'—';
+  const recNum=document.getElementById('recNum').value.trim()||`001-001-${String(num).padStart(7,'0')}`;
+  SYS.recibos.push({id:tid(),num:recNum,numInt:num,fecha:document.getElementById('recDate').value,clienteId,nombre,monto,concepto,ref:document.getElementById('recRef').value.trim(),pago:document.getElementById('recPago').value});
+  saveSys();renderRecHistory();showToast(`✅ Recibo ${recNum} guardado`);
+}
+function renderRecHistory(){
+  const list=[...(SYS.recibos||[])].reverse();
+  document.getElementById('recHistory').innerHTML=list.length?list.map(r=>`<div style="padding:.9rem;border-bottom:1px solid rgba(255,255,255,.05)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem">${r.num}</span>
+      <span style="color:var(--y);font-family:'Bebas Neue',sans-serif;font-size:1.1rem">${fmtGs(r.monto)}</span>
+    </div>
+    <div style="font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:.5rem">${r.nombre} · ${fmtDate(r.fecha)}</div>
+    <div style="display:flex;gap:.4rem">
+      <button class="btn btn-b btn-sm" onclick="previewDocFromData('recibo',${r.id})">👁</button>
+      <button class="btn btn-g btn-sm" onclick="printDocFromData('recibo',${r.id})">🖨</button>
+      <button class="btn btn-r btn-sm" onclick="deleteRec(${r.id})">🗑</button>
+    </div>
+  </div>`).join(''):emptyMsg('Sin recibos');
+}
+function deleteRec(id){if(!confirm('¿Eliminar recibo?'))return;SYS.recibos=SYS.recibos.filter(r=>r.id!=id);saveSys();renderRecHistory();showToast('🗑 Eliminado');}
+
+// ═══════════════════════════════
+// REPORTES
+// ═══════════════════════════════
+function renderReportes(){
+  const ventas=SYS.facturas||[];const totalVentas=ventas.reduce((a,f)=>a+f.total,0);
+  const movIn=(SYS.movimientos||[]).filter(m=>m.tipo==='entrada');const movOut=(SYS.movimientos||[]).filter(m=>m.tipo==='salida');
+  document.getElementById('reportStats').innerHTML=`
+    <div class="sc green"><div class="sc-num">${fmtGs(totalVentas)}</div><div class="sc-label">Total facturado</div></div>
+    <div class="sc yellow"><div class="sc-num">${ventas.length}</div><div class="sc-label">Facturas emitidas</div></div>
+    <div class="sc blue"><div class="sc-num">${movIn.length}</div><div class="sc-label">Entradas de stock</div></div>
+    <div class="sc red"><div class="sc-num">${movOut.length}</div><div class="sc-label">Salidas de stock</div></div>`;
+  // Sales by month
+  const byMonth={};ventas.forEach(f=>{const m=f.fecha?f.fecha.substring(0,7):'?';byMonth[m]=(byMonth[m]||0)+f.total;});
+  const months=Object.keys(byMonth).sort().reverse().slice(0,6);
+  const maxM=Math.max(...months.map(m=>byMonth[m]),1);
+  document.getElementById('reportVentasMes').innerHTML=months.length?months.map(m=>`<div style="display:flex;align-items:center;gap.8rem;margin-bottom:.7rem"><span style="width:70px;font-size:.78rem;color:rgba(255,255,255,.5);font-family:'Barlow Condensed'">${m}</span><div style="flex:1;background:rgba(255,255,255,.06);height:18px;position:relative"><div style="width:${Math.round(byMonth[m]/maxM*100)}%;background:var(--y);height:100%"></div></div><span style="width:100px;text-align:right;font-size:.8rem;color:var(--y);font-family:'Bebas Neue'">${fmtGs(byMonth[m])}</span></div>`).join(''):emptyMsg('Sin ventas');
+  // Top products
+  const prodSales={};ventas.forEach(f=>(f.items||[]).forEach(it=>{prodSales[it.desc]=(prodSales[it.desc]||0)+it.subtotal;}));
+  const top=Object.entries(prodSales).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const maxP=Math.max(...top.map(t=>t[1]),1);
+  document.getElementById('reportTopProd').innerHTML=top.length?top.map(([n,v])=>`<div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.7rem"><span style="flex:1;font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${n}</span><div style="width:80px;background:rgba(255,255,255,.06);height:14px"><div style="width:${Math.round(v/maxP*100)}%;background:#4caf50;height:100%"></div></div><span style="width:90px;text-align:right;font-size:.8rem;color:#4caf50;font-family:'Bebas Neue'">${fmtGs(v)}</span></div>`).join(''):emptyMsg('Sin datos');
+  // Entradas/salidas
+  const last8in=[...movIn].reverse().slice(0,8);const last8out=[...movOut].reverse().slice(0,8);
+  document.getElementById('reportEntradas').innerHTML=last8in.length?last8in.map(m=>`<div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem"><span class="mov-in">↑ ${m.prod}</span><span style="color:rgba(255,255,255,.4)">${m.qty} u · ${fmtDate(m.fecha)}</span></div>`).join(''):emptyMsg('Sin entradas');
+  document.getElementById('reportSalidas').innerHTML=last8out.length?last8out.map(m=>`<div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem"><span class="mov-out">↓ ${m.prod}</span><span style="color:rgba(255,255,255,.4)">${m.qty} u · ${fmtDate(m.fecha)}</span></div>`).join(''):emptyMsg('Sin salidas');
+}
+
+// ═══════════════════════════════
+// DOCUMENT GENERATION
+// ═══════════════════════════════
+const cfg=()=>SYS.config;
+
+function buildPresHTML(pres){
+  const rowsHtml=(pres.items||[]).map(it=>`<tr><td>${it.desc||'—'}</td><td class="right">${it.qty}</td><td class="right">${it.precio?fmtGs(gs(it.precio)):'—'}</td><td class="right">${fmtGs(it.subtotal)}</td></tr>`).join('');
+  return `<div class="doc-sheet">
+    <div class="doc-header">
+      <div><div class="doc-brand">${cfg().empresa||'Power One Py'}</div><div class="doc-brand-sub">${cfg().dir||''} · ${cfg().tel||''} · ${cfg().email||''}</div><div class="doc-brand-sub">RUC: ${cfg().ruc||'—'}</div></div>
+      <div><div class="doc-type-box">PRESUPUESTO</div><div class="doc-type-num">N° ${String(pres.num).padStart(7,'0')}</div></div>
+    </div>
+    <div class="doc-meta">
+      <div class="doc-meta-box"><div class="doc-meta-label">Cliente</div><div class="doc-meta-val"><strong>${pres.clienteNom||'Sin cliente'}</strong></div></div>
+      <div class="doc-meta-box"><div class="doc-meta-label">Fechas</div><div class="doc-meta-val">Emisión: ${fmtDate(pres.fecha)}<br>Válido hasta: ${fmtDate(pres.validHasta)}</div></div>
+    </div>
+    ${pres.notas?`<div class="doc-note">${pres.notas}</div>`:''}
+    <table class="doc-table"><thead><tr><th>Descripción</th><th class="right">Cant.</th><th class="right">Precio Unit.</th><th class="right">Subtotal</th></tr></thead><tbody>${rowsHtml}</tbody></table>
+    <div class="doc-totals"><div class="doc-totals-box"><div class="doc-total-row final"><span>TOTAL</span><span>${fmtGs(pres.total)}</span></div></div></div>
+    <div class="doc-signs"><div class="doc-sign-box">Firma y sello empresa</div><div class="doc-sign-box">Aceptado por cliente</div></div>
+    <div class="doc-footer"><span>${cfg().empresa} · RUC ${cfg().ruc}</span><span>Válido hasta ${fmtDate(pres.validHasta)}</span></div>
+  </div>`;
+}
+
+function buildFacHTML(fac){
+  const rowsHtml=(fac.items||[]).map(it=>`<tr><td>${it.desc||'—'}</td><td class="right">${it.qty}</td><td class="right">${it.precio?fmtGs(gs(it.precio)):'—'}</td><td class="right">${fmtGs(it.subtotal)}</td></tr>`).join('');
+  const iva=Math.round(fac.total/11);
+  return `<div class="doc-sheet">
+    <div class="doc-header">
+      <div><div class="doc-brand">${cfg().empresa||'Power One Py'}</div><div class="doc-brand-sub">${cfg().dir||''} · Tel: ${cfg().tel||''}</div><div class="doc-brand-sub">RUC: ${cfg().ruc||'—'} · ${cfg().email||''}</div></div>
+      <div><div class="doc-type-box">FACTURA</div><div class="doc-type-num">${fac.num}</div></div>
+    </div>
+    <div class="doc-meta">
+      <div class="doc-meta-box"><div class="doc-meta-label">Cliente</div><div class="doc-meta-val"><strong>${fac.clienteNom||'Consumidor Final'}</strong><br>RUC/CI: ${fac.clienteRuc||'—'}</div></div>
+      <div class="doc-meta-box"><div class="doc-meta-label">Datos de factura</div><div class="doc-meta-val">Fecha: ${fmtDate(fac.fecha)}<br>Condición: ${fac.pago||'Contado'}</div></div>
+    </div>
+    ${fac.notas?`<div class="doc-note">${fac.notas}</div>`:''}
+    <table class="doc-table"><thead><tr><th>Descripción</th><th class="right">Cant.</th><th class="right">Precio Unit.</th><th class="right">Total</th></tr></thead><tbody>${rowsHtml}</tbody></table>
+    <div class="doc-totals"><div class="doc-totals-box">
+      <div class="doc-total-row"><span>Subtotal</span><span>${fmtGs(fac.total)}</span></div>
+      <div class="doc-total-row"><span>IVA 10% incluido</span><span>${fmtGs(iva)}</span></div>
+      <div class="doc-total-row final"><span>TOTAL</span><span>${fmtGs(fac.total)}</span></div>
+    </div></div>
+    <div class="doc-signs"><div class="doc-sign-box">Firma autorizada</div><div class="doc-sign-box">Recibido conforme</div></div>
+    <div class="doc-footer"><span>${cfg().empresa} · RUC ${cfg().ruc}</span><span>Factura N° ${fac.num} · ${fmtDate(fac.fecha)}</span></div>
+  </div>`;
+}
+
+function buildRecHTML(rec){
+  const letras=numToLetras(rec.monto);
+  return `<div class="doc-sheet" style="min-height:auto">
+    <div class="doc-header">
+      <div><div class="doc-brand">${cfg().empresa||'Power One Py'}</div><div class="doc-brand-sub">${cfg().dir||''} · Tel: ${cfg().tel||''}</div><div class="doc-brand-sub">RUC: ${cfg().ruc||'—'}</div></div>
+      <div><div class="doc-type-box">RECIBO</div><div class="doc-type-num">${rec.num}</div></div>
+    </div>
+    <div style="margin:1.5rem 0;border:1px solid #ddd;padding:1.5rem">
+      <table style="width:100%;border-collapse:collapse;font-size:.9rem">
+        <tr><td style="padding:.5rem;width:140px;color:#888;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">Recibí de:</td><td style="padding:.5rem;font-weight:700;border-bottom:1px solid #ddd">${rec.nombre||'—'}</td></tr>
+        <tr><td style="padding:.5rem;color:#888;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">La suma de:</td><td style="padding:.5rem;border-bottom:1px solid #ddd">${fmtGs(rec.monto)} <em style="color:#888;font-size:.82rem">(${letras})</em></td></tr>
+        <tr><td style="padding:.5rem;color:#888;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">Por concepto:</td><td style="padding:.5rem;border-bottom:1px solid #ddd">${rec.concepto}</td></tr>
+        <tr><td style="padding:.5rem;color:#888;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">Forma de pago:</td><td style="padding:.5rem;border-bottom:1px solid #ddd">${rec.pago}</td></tr>
+        ${rec.ref?`<tr><td style="padding:.5rem;color:#888;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">Referencia:</td><td style="padding:.5rem;border-bottom:1px solid #ddd">${rec.ref}</td></tr>`:''}
+        <tr><td style="padding:.5rem;color:#888;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em">Fecha:</td><td style="padding:.5rem">${fmtDate(rec.fecha)}</td></tr>
+      </table>
+    </div>
+    <div class="doc-signs" style="margin-top:2rem"><div class="doc-sign-box">Firma quien recibe</div><div class="doc-sign-box">Firma quien entrega</div></div>
+    <div class="doc-footer" style="margin-top:1.5rem"><span>${cfg().empresa} · RUC ${cfg().ruc}</span><span>Recibo N° ${rec.num}</span></div>
+  </div>`;
+}
+
+function numToLetras(n){
+  const u=['','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve','diez','once','doce','trece','catorce','quince','dieciséis','diecisiete','dieciocho','diecinueve'];
+  const d=['','','veinte','treinta','cuarenta','cincuenta','sesenta','setenta','ochenta','noventa'];
+  if(!n||n===0)return'cero';
+  if(n<20)return u[n];
+  if(n<100)return d[Math.floor(n/10)]+(n%10?(' y '+u[n%10]):'');
+  if(n<1000)return(Math.floor(n/100)===1?'cien':(u[Math.floor(n/100)]+' cientos'))+(n%100?' '+numToLetras(n%100):'');
+  if(n<1000000)return numToLetras(Math.floor(n/1000))+' mil'+(n%1000?' '+numToLetras(n%1000):'');
+  return n.toLocaleString('es-PY');
+}
+
+// Preview from current form
+function previewDoc(type){
+  let html='';
+  if(type==='presupuesto'){const total=presItems.reduce((a,it)=>a+(it.subtotal||0),0);const cid=document.getElementById('presClient').value;const cl=SYS.clientes.find(c=>c.id==cid);html=buildPresHTML({num:'PREV',fecha:new Date().toISOString().split('T')[0],clienteNom:cl?cl.nombre:'Sin cliente',items:presItems,total,notas:document.getElementById('presNotes').value,validHasta:document.getElementById('presValid').value});}
+  else if(type==='factura'){const total=facItems.reduce((a,it)=>a+(it.subtotal||0),0);const cid=document.getElementById('facClient').value;const cl=SYS.clientes.find(c=>c.id==cid);html=buildFacHTML({num:document.getElementById('facNum').value||'PREVIEW',fecha:document.getElementById('facDate').value,clienteNom:cl?cl.nombre:'Consumidor Final',clienteRuc:cl?cl.ruc:'—',items:facItems,total,notas:document.getElementById('facNotes').value,pago:document.getElementById('facPago').value});}
+  else if(type==='recibo'){const monto=gs(document.getElementById('recMonto').value);html=buildRecHTML({num:document.getElementById('recNum').value||'PREV',fecha:document.getElementById('recDate').value,nombre:document.getElementById('recName').value||'—',monto,concepto:document.getElementById('recConcepto').value,ref:document.getElementById('recRef').value,pago:document.getElementById('recPago').value});}
+  showPrint(html);
+}
+
+// Preview from saved data
+function previewDocFromData(type,id){
+  let html='';
+  if(type==='presupuesto'){const p=SYS.presupuestos.find(x=>x.id==id);if(p)html=buildPresHTML(p);}
+  else if(type==='factura'){const f=SYS.facturas.find(x=>x.id==id);if(f)html=buildFacHTML(f);}
+  else if(type==='recibo'){const r=SYS.recibos.find(x=>x.id==id);if(r)html=buildRecHTML(r);}
+  if(html)showPrint(html);
+}
+function printDoc(type){previewDoc(type);}
+function printDocFromData(type,id){previewDocFromData(type,id);}
+
+function showPrint(html){
+  document.getElementById('printContent').innerHTML=html;
+  document.getElementById('printOverlay').style.display='block';
+  document.body.style.overflow='hidden';
+}
+function closePrint(){document.getElementById('printOverlay').style.display='none';document.body.style.overflow='';}
+
+// PDF export using jsPDF
+async function exportPDF(){
+  const { jsPDF } = window.jspdf;
+  if(!jsPDF){ window.print(); return; }
+  showToast('Generando PDF...');
+  try{
+    const el=document.getElementById('printContent');
+    const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    // Use html method if available
+    await doc.html(el,{callback:d=>{d.save('documento-poweronepy.pdf');showToast('✅ PDF descargado');},x:0,y:0,width:210,windowWidth:794});
+  }catch(e){ window.print(); }
+}
+async function exportPresPDF(){
+  const total=presItems.reduce((a,it)=>a+(it.subtotal||0),0);
+  const cid=document.getElementById('presClient').value;const cl=SYS.clientes.find(c=>c.id==cid);
+  const html=buildPresHTML({num:'PREVIEW',fecha:new Date().toISOString().split('T')[0],clienteNom:cl?cl.nombre:'Sin cliente',items:presItems,total,notas:document.getElementById('presNotes').value,validHasta:document.getElementById('presValid').value});
+  showPrint(html);
+  setTimeout(()=>exportPDF(),300);
+}
+async function exportPresFromData(id){
+  const p=SYS.presupuestos.find(x=>x.id==id);
+  if(p){showPrint(buildPresHTML(p));setTimeout(()=>exportPDF(),300);}
+}
+</script>
+</body>
+</html>
