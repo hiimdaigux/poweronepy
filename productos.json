@@ -7,7 +7,8 @@
       "desc": "Auriculares inalámbricos con cancelación de ruido y 30hs de batería.",
       "price": "150.000 Gs.",
       "badge": "Nuevo",
-      "img": ""
+      "img": "https://res.cloudinary.com/drzu2lb6c/image/upload/v1772674765/poweronepy/yes8pqg1hnwiwzjas7hv.jpg",
+      "discount": ""
     },
     {
       "id": 2,
@@ -20,12 +21,13 @@
     },
     {
       "id": 3,
-      "name": "Autoradio 2DIN Android",
+      "name": "Autoradio 2DIN Android Stock",
       "cat": "Car Audio",
       "desc": "Pantalla táctil, Android Auto, WiFi y GPS.",
       "price": "450.000 Gs.",
       "badge": "Oferta",
-      "img": ""
+      "img": "",
+      "discount": ""
     },
     {
       "id": 1772673312342,
