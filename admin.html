@@ -285,7 +285,7 @@ textarea.form-input{resize:vertical}
               </div>
               <div>
                 <label class="form-label">Precio</label>
-                <input class="form-input" type="text" id="pPrice" placeholder="Ej: 150.000 Gs.">
+                <input class="form-input" type="text" id="pPrice" placeholder="Ej: 150.000 Gs." oninput="previewDiscount()">
               </div>
               <div>
                 <label class="form-label">Badge / Etiqueta</label>
@@ -296,6 +296,11 @@ textarea.form-input{resize:vertical}
                   <option value="Hot">⚡ Hot</option>
                   <option value="Último">⚠ Último</option>
                 </select>
+              </div>
+              <div>
+                <label class="form-label">Descuento temporal (%)</label>
+                <input class="form-input" type="number" id="pDiscount" placeholder="Ej: 20 (dejar vacío si no aplica)" min="0" max="99" oninput="previewDiscount()">
+                <div id="discPreview" style="margin-top:.5rem;font-size:.82rem;color:#ff4d4d;font-family:'Barlow Condensed',sans-serif;font-weight:600;letter-spacing:.05em;min-height:1.2rem"></div>
               </div>
               <div class="s2">
                 <label class="form-label">Imagen del producto</label>
@@ -709,15 +714,16 @@ async function saveProduct() {
   const desc = document.getElementById('pDesc').value.trim();
   const price = document.getElementById('pPrice').value.trim();
   const badge = document.getElementById('pBadge').value;
+  const discount = document.getElementById('pDiscount').value.trim();
   const urlImg = document.getElementById('pImgUrl').value.trim();
   const img = (tempImg && tempImg.url) || urlImg || '';
   const editId = document.getElementById('editId').value;
 
   if (editId) {
     const idx = DB.products.findIndex(p=>p.id==editId);
-    if (idx>-1) DB.products[idx] = {...DB.products[idx], name, cat, desc, price, badge, img};
+    if (idx>-1) DB.products[idx] = {...DB.products[idx], name, cat, desc, price, badge, discount, img};
   } else {
-    DB.products.push({ id: Date.now(), name, cat, desc, price, badge, img });
+    DB.products.push({ id: Date.now(), name, cat, desc, price, badge, discount, img });
   }
 
   saveDB();
@@ -740,6 +746,7 @@ function editProduct(id) {
     document.getElementById('pDesc').value = p.desc||'';
     document.getElementById('pPrice').value = p.price||'';
     document.getElementById('pBadge').value = p.badge||'';
+    document.getElementById('pDiscount').value = p.discount||'';
     document.getElementById('pImgUrl').value = p.img||'';
     tempImg = p.img ? {url:p.img} : null;
     document.getElementById('imgPreview').innerHTML = p.img
@@ -763,10 +770,33 @@ function clearForm() {
   document.getElementById('editId').value = '';
   ['pName','pDesc','pPrice','pImgUrl'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('pBadge').value = '';
+  document.getElementById('pDiscount').value = '';
+  document.getElementById('discPreview').textContent = '';
   document.getElementById('pImgFile').value = '';
   document.getElementById('imgPreview').innerHTML = '';
   updateCatSelect();
   tempImg = null;
+}
+
+function previewDiscount() {
+  const price = document.getElementById('pPrice').value.trim();
+  const disc = parseFloat(document.getElementById('pDiscount').value) || 0;
+  const el = document.getElementById('discPreview');
+  if (!disc || disc <= 0 || !price) { el.textContent = ''; return; }
+  // Quick calc
+  const clean = price.replace(/\./g,'').replace(/,/g,'.');
+  const m = clean.match(/\d+(\.\d+)?/);
+  if (!m) { el.textContent = ''; return; }
+  const num = parseFloat(m[0]);
+  const result = Math.round(num * (1 - disc/100));
+  const suffix = price.replace(/[\d.,\s]/g,'').trim();
+  let formatted;
+  if (price.match(/\d{1,3}\.\d{3}/)) {
+    formatted = result.toLocaleString('de-DE') + (suffix ? ' ' + suffix : '');
+  } else {
+    formatted = result + (suffix ? ' ' + suffix : '');
+  }
+  el.innerHTML = `⚡ Precio con descuento: <strong>${formatted}</strong> (antes: ${price})`;
 }
 
 // ═══════════════════════════════════════════════

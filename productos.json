@@ -13,7 +13,7 @@
       "id": 2,
       "name": "Teclado Mecánico RGB",
       "cat": "Informática",
-      "desc": "Teclado mecánico con switches azules y retroiluminación RGB.",
+      "desc": "Teclado mecánico con switches azules y retroiluminación RGB completa.",
       "price": "280.000 Gs.",
       "badge": "Hot",
       "img": ""
@@ -22,63 +22,22 @@
       "id": 3,
       "name": "Autoradio 2DIN Android",
       "cat": "Car Audio",
-      "desc": "Pantalla táctil, Android Auto, WiFi y GPS.",
+      "desc": "Radio para auto con pantalla táctil, Android Auto, WiFi y GPS integrado.",
       "price": "450.000 Gs.",
       "badge": "Oferta",
       "img": ""
-    },
-    {
-      "id": 1772673312342,
-      "name": "test",
-      "cat": "Informática",
-      "desc": "test",
-      "price": "120000",
-      "badge": "Nuevo",
-      "img": "https://res.cloudinary.com/drzu2lb6c/image/upload/v1772673305/poweronepy/hqcqbiytpy4lfumfxuo7.jpg"
     }
   ],
   "categories": [
-    {
-      "id": 1,
-      "name": "Electrónica",
-      "icon": "📱"
-    },
-    {
-      "id": 2,
-      "name": "Informática",
-      "icon": "💻"
-    },
-    {
-      "id": 3,
-      "name": "Car Audio",
-      "icon": "🚗"
-    }
+    { "id": 1, "name": "Electrónica", "icon": "📱" },
+    { "id": 2, "name": "Informática", "icon": "💻" },
+    { "id": 3, "name": "Car Audio", "icon": "🚗" }
   ],
   "services": [
-    {
-      "id": 1,
-      "icon": "🛡️",
-      "name": "Garantía de fábrica",
-      "desc": "Todos nuestros productos cuentan con garantía oficial."
-    },
-    {
-      "id": 2,
-      "icon": "🚚",
-      "name": "Envío a todo el país",
-      "desc": "Enviamos por encomienda a cualquier punto de Paraguay."
-    },
-    {
-      "id": 3,
-      "icon": "💬",
-      "name": "Asesoramiento personalizado",
-      "desc": "Te ayudamos a elegir el producto ideal."
-    },
-    {
-      "id": 4,
-      "icon": "💳",
-      "name": "Facilidades de pago",
-      "desc": "Transferencia, efectivo y cuotas sin interés."
-    }
+    { "id": 1, "icon": "🛡️", "name": "Garantía de fábrica", "desc": "Todos nuestros productos cuentan con garantía oficial del fabricante." },
+    { "id": 2, "icon": "🚚", "name": "Envío a todo el país", "desc": "Enviamos por encomienda a cualquier punto de Paraguay." },
+    { "id": 3, "icon": "💬", "name": "Asesoramiento personalizado", "desc": "Te ayudamos a elegir el producto ideal para tus necesidades." },
+    { "id": 4, "icon": "💳", "name": "Facilidades de pago", "desc": "Aceptamos transferencia, efectivo y cuotas sin interés." }
   ],
   "config": {
     "wa": "595981570126",
@@ -86,6 +45,6 @@
     "email": "info@poweronepy.com",
     "address": "Asunción, Paraguay",
     "hours": "Lun-Sáb 08:00 - 18:00",
-    "heroDesc": "Tu destino de tecnología en Paraguay."
+    "heroDesc": "Tu destino de tecnología en Paraguay. Electrónica, informática y car audio al mejor precio del mercado."
   }
 }
