@@ -17,7 +17,7 @@
 .page-subtitle{font-size:1rem;color:rgba(255,255,255,.45);margin-top:.7rem;line-height:1.6;max-width:480px}
 
 /* Category sidebar pills */
-.products-layout{display:grid;grid-template-columns:220px 1fr;gap:2.5rem;max-width:1300px;margin:0 auto;padding:2.5rem 5%}
+.products-layout{display:grid;grid-template-columns:220px 1fr;gap:2.5rem;max-width:1200px;margin:0 auto;padding:2.5rem 5%;overflow-x:hidden;min-width:0}
 .sidebar{position:sticky;top:84px;align-self:start}
 .sidebar-title{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.2em;margin-bottom:1rem;padding-bottom:.7rem;border-bottom:1px solid rgba(255,255,255,.06)}
 .cat-pill{display:flex;align-items:center;justify-content:space-between;padding:.7rem 1rem;cursor:pointer;color:rgba(255,255,255,.5);font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.9rem;text-transform:uppercase;letter-spacing:.06em;transition:all .2s;border-left:3px solid transparent;margin-bottom:2px;text-decoration:none}
@@ -27,14 +27,16 @@
 .cat-pill.active .cat-pill-count{background:rgba(var(--accent-rgb),.15);color:var(--accent)}
 
 /* Main content */
-.products-main{}
+.products-main{min-width:0;overflow-x:hidden}
 .products-toolbar{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}
 .products-toolbar .search-wrap{flex:1;min-width:200px;max-width:360px}
 .active-filter-label{font-family:'Barlow Condensed',sans-serif;font-size:.85rem;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.1em}
 .active-filter-label span{color:var(--accent)}
 .result-count{font-family:'Barlow Condensed',sans-serif;font-size:.8rem;color:rgba(255,255,255,.3);margin-left:auto;letter-spacing:.06em;text-transform:uppercase}
 
-@media(max-width:900px){.products-layout{grid-template-columns:1fr}.sidebar{position:static}.sidebar-pills{display:flex;flex-wrap:wrap;gap:.4rem}.cat-pill{padding:.5rem .9rem;border-left:none;border-bottom:2px solid transparent;margin-bottom:0}.cat-pill.active{border-left:none;border-bottom-color:var(--accent)}}
+@media(max-width:900px){.products-layout{grid-template-columns:1fr;padding:1.5rem 4%}.sidebar{position:static}.sidebar-pills{display:flex;flex-wrap:wrap;gap:.4rem}.cat-pill{padding:.5rem .9rem;border-left:none;border-bottom:2px solid transparent;margin-bottom:0}.cat-pill.active{border-left:none;border-bottom-color:var(--accent)}}
+.prod-grid{width:100%;min-width:0}
+body{overflow-x:hidden}
 </style>
 </head>
 <body>
@@ -181,7 +183,7 @@ function prodCard(p,i) {
   const pc=calcPrice(p);
   return`<div class="prod-card" style="animation-delay:${i*.045}s" onclick="openModal(${p.id})">
     <div class="prod-img-wrap">${p.img?`<img src="${p.img}" alt="${p.name}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`:``}<div class="no-img" style="${p.img?'display:none':'display:flex'}">📦</div>${pc.hasDisc?`<div class="prod-badge red">-${p.discount}%</div>`:p.badge?`<div class="prod-badge yellow">${p.badge}</div>`:''}</div>
-    <div class="prod-info"><div class="prod-cat">${p.cat}</div><div class="prod-name">${p.name}</div><div class="prod-desc-text">${p.desc||'Consultá disponibilidad'}</div>
+    <div class="prod-info"><div class="prod-cat">${p.cat}</div><div class="prod-name">${p.name}</div><div class="prod-desc-text">${(p.desc||'Consultá disponibilidad').replace(/\n/g,'<br>')}</div>
       <div class="prod-footer"><div class="price-block">${pc.hasDisc?`<div class="price-original-text">${p.price}</div>`:''}<div class="price-final${pc.hasDisc?' red':''}"><span class="price-from-sm">desde</span>${pc.display}${pc.hasDisc?`<span class="disc-tag">-${p.discount}%</span>`:''}</div></div>
       <a class="btn-wa" href="${waLink(p,DB)}" target="_blank" onclick="event.stopPropagation()">💬</a></div></div></div>`;
 }
@@ -192,7 +194,7 @@ function openModal(id) {
   document.getElementById('mGallery').innerHTML=(p.img?`<img src="${p.img}" alt="${p.name}">`:`<div class="no-img-lg">📦</div>`)+(pc.hasDisc?`<div class="modal-gallery-badge red">-${p.discount}% OFF</div>`:p.badge?`<div class="modal-gallery-badge yellow">${p.badge}</div>`:'');
   document.getElementById('mCat').textContent=p.cat;
   document.getElementById('mName').textContent=p.name;
-  document.getElementById('mDesc').textContent=p.desc||'Sin descripción disponible.';
+  document.getElementById('mDesc').innerHTML=(p.desc||'Sin descripción disponible.').replace(/\n/g,'<br>');
   document.getElementById('mPrice').innerHTML=pc.hasDisc?`<div class="modal-price-wrap"><div class="modal-price-old">${p.price}</div><div class="modal-price-new red">${pc.display}</div><div class="modal-disc-chip">-${p.discount}% OFF</div></div>`:`<div class="modal-price-wrap"><div class="modal-price-new">${p.price||'Consultar precio'}</div></div>`;
   document.getElementById('mCtas').innerHTML=`<a class="btn-modal-wa" href="${waLink(p,DB)}" target="_blank">💬 Consultar por WhatsApp</a><button class="btn-modal-back" onclick="closeModal()">← Seguir viendo</button>`;
   renderSimilar(p);

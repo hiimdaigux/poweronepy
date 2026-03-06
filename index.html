@@ -199,7 +199,7 @@ function prodCard(p,i){
   const pc=calcPrice(p);
   return`<div class="prod-card" style="animation-delay:${i*.055}s" onclick="openModal(${p.id})">
     <div class="prod-img-wrap">${p.img?`<img src="${p.img}" alt="${p.name}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`:``}<div class="no-img" style="${p.img?'display:none':'display:flex'}">📦</div>${pc.hasDisc?`<div class="prod-badge red">-${p.discount}%</div>`:p.badge?`<div class="prod-badge yellow">${p.badge}</div>`:''}</div>
-    <div class="prod-info"><div class="prod-cat">${p.cat}</div><div class="prod-name">${p.name}</div><div class="prod-desc-text">${p.desc||'Consultá disponibilidad'}</div>
+    <div class="prod-info"><div class="prod-cat">${p.cat}</div><div class="prod-name">${p.name}</div><div class="prod-desc-text">${(p.desc||'Consultá disponibilidad').replace(/\n/g,'<br>')}</div>
       <div class="prod-footer"><div class="price-block">${pc.hasDisc?`<div class="price-original-text">${p.price}</div>`:''}<div class="price-final${pc.hasDisc?' red':''}"><span class="price-from-sm">desde</span>${pc.display}${pc.hasDisc?`<span class="disc-tag">-${p.discount}%</span>`:''}</div></div>
       <a class="btn-wa" href="${waLink(p,DB)}" target="_blank" onclick="event.stopPropagation()">💬</a></div></div></div>`;
 }
@@ -209,7 +209,7 @@ function openModal(id){
   document.getElementById('mGallery').innerHTML=(p.img?`<img src="${p.img}" alt="${p.name}">`:`<div class="no-img-lg">📦</div>`)+(pc.hasDisc?`<div class="modal-gallery-badge red">-${p.discount}% OFF</div>`:p.badge?`<div class="modal-gallery-badge yellow">${p.badge}</div>`:'');
   document.getElementById('mCat').textContent=p.cat;
   document.getElementById('mName').textContent=p.name;
-  document.getElementById('mDesc').textContent=p.desc||'Sin descripción disponible.';
+  document.getElementById('mDesc').innerHTML=(p.desc||'Sin descripción disponible.').replace(/\n/g,'<br>');
   document.getElementById('mPrice').innerHTML=pc.hasDisc?`<div class="modal-price-wrap"><div class="modal-price-old">${p.price}</div><div class="modal-price-new red">${pc.display}</div><div class="modal-disc-chip">-${p.discount}% OFF</div></div>`:`<div class="modal-price-wrap"><div class="modal-price-new">${p.price||'Consultar precio'}</div></div>`;
   document.getElementById('mCtas').innerHTML=`<a class="btn-modal-wa" href="${waLink(p,DB)}" target="_blank">💬 Consultar por WhatsApp</a><button class="btn-modal-back" onclick="closeModal()">← Seguir viendo</button>`;
   renderSimilar(p);

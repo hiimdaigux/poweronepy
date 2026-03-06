@@ -177,7 +177,7 @@ select.fi option{background:var(--bm)}textarea.fi{resize:vertical}
             <div class="fg">
               <div class="fgroup"><label class="fl">Nombre *</label><input class="fi" type="text" id="pName" placeholder="Ej: Auricular Bluetooth X200"></div>
               <div class="fgroup"><label class="fl">Categoría *</label><select class="fi" id="pCat"><option value="">Seleccionar...</option></select></div>
-              <div class="fgroup s2"><label class="fl">Descripción</label><textarea class="fi" id="pDesc" rows="3" placeholder="Descripción del producto..."></textarea></div>
+              <div class="fgroup s2"><label class="fl">Descripción <span style="font-size:.7rem;color:rgba(255,255,255,.3);text-transform:none;letter-spacing:0;font-family:'Barlow',sans-serif">(cada línea aparece separada en el sitio)</span></label><textarea class="fi" id="pDesc" rows="5" placeholder="Línea 1 de descripción&#10;Línea 2&#10;Características..."></textarea></div>
               <div class="fgroup"><label class="fl">Precio</label><input class="fi" type="text" id="pPrice" placeholder="150.000 Gs." oninput="previewDiscount()"></div>
               <div class="fgroup"><label class="fl">Badge / Etiqueta</label><select class="fi" id="pBadge"><option value="">Sin etiqueta</option><option>Nuevo</option><option>Oferta</option><option>Hot</option><option>Último</option></select></div>
               <div class="fgroup">
@@ -527,11 +527,24 @@ async function saveSettings() {
   showToast('✅ Guardado en Supabase');
 }
 async function changePassword() {
-  const np=document.getElementById('cfgNewPass').value,cp=document.getElementById('cfgConfPass').value,err=document.getElementById('passErr');
-  if(!np){err.textContent='Ingresá contraseña';return;} if(np.length<6){err.textContent='Mínimo 6 caracteres';return;} if(np!==cp){err.textContent='No coinciden';return;}
-  await db.upsert('config',{id:1,admin_password:np},'id');
-  err.textContent=''; document.getElementById('cfgNewPass').value=''; document.getElementById('cfgConfPass').value='';
-  showToast('✅ Contraseña actualizada en Supabase');
+  const np=document.getElementById('cfgNewPass').value.trim();
+  const cp=document.getElementById('cfgConfPass').value.trim();
+  const err=document.getElementById('passErr');
+  err.textContent='';
+  if(!np){err.textContent='Ingresá una contraseña';return;}
+  if(np.length<6){err.textContent='Mínimo 6 caracteres';return;}
+  if(np!==cp){err.textContent='Las contraseñas no coinciden';return;}
+  try{
+    const btn=event.target; btn.disabled=true; btn.textContent='Guardando...';
+    await db.upsert('config',{id:1,admin_password:np},'id');
+    document.getElementById('cfgNewPass').value='';
+    document.getElementById('cfgConfPass').value='';
+    showToast('✅ Contraseña actualizada');
+    btn.disabled=false; btn.textContent='🔒 CAMBIAR CONTRASEÑA';
+  }catch(e){
+    err.textContent='⚠ Error: '+e.message;
+    event.target.disabled=false; event.target.textContent='🔒 CAMBIAR CONTRASEÑA';
+  }
 }
 async function renderCatList() {
   const cats=await db.get('categories',{order:'name.asc'});

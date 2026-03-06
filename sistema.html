@@ -603,15 +603,15 @@ window.addEventListener('load', async ()=>{
 // NAVIGATION
 // ═══════════════════════════════
 const PAGES_MAP = { dashboard:'Dashboard', stock:'Stock / Inventario', movimientos:'Movimientos', clientes:'Clientes', proveedores:'Proveedores', presupuestos:'Presupuestos', facturas:'Facturas', recibos:'Recibos', reportes:'Reportería' };
-function goPage(id){
+async function goPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   const pg = document.getElementById('page'+id.charAt(0).toUpperCase()+id.slice(1));
   if(pg) pg.classList.add('active');
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
   document.querySelectorAll('.ni').forEach(n=>{ if(n.textContent.trim().toLowerCase().includes(id.toLowerCase().substring(0,5))) n.classList.add('active'); });
   document.getElementById('pageTitle').textContent = (PAGES_MAP[id]||id).toUpperCase();
-  const renders = { dashboard:renderDashboard, stock:renderStock, movimientos:renderMovs, clientes:renderClients, proveedores:renderProvs, presupuestos:()=>{renderPresHistory();populateSelects();initPresItems();}, facturas:()=>{renderFacHistory();populateSelects();initFacItems();}, recibos:()=>{renderRecHistory();populateSelects();}, reportes:renderReportes };
-  if(renders[id]) renders[id]();
+  const renders = { dashboard:renderDashboard, stock:renderStock, movimientos:renderMovs, clientes:renderClients, proveedores:renderProvs, presupuestos:async()=>{await populateSelects();renderPresHistory();initPresItems();}, facturas:async()=>{await populateSelects();renderFacHistory();initFacItems();}, recibos:async()=>{await populateSelects();renderRecHistory();}, reportes:renderReportes };
+  if(renders[id]) await renders[id]();
 }
 
 // ═══════════════════════════════
@@ -689,7 +689,7 @@ async function renderStock(){
   if(q) list=list.filter(s=>(s.nombre+(s.cod||'')+(s.categoria||'')).toLowerCase().includes(q));
   if(cf) list=list.filter(s=>s.categoria===cf);
   document.getElementById('stockCount').textContent=list.length;
-  const bar=(s)=>{const pct=Math.min(100,s.minQty>0?Math.round(s.qty/s.minQty*50):50);const col=s.qty===0?'#ff4d4d':s.qty<=s.minQty?'#FFD600':'#4caf50';return`<div class="stock-bar-wrap"><div class="stock-bar" style="width:${pct}%;background:${col}"></div></div> ${s.qty}`;};
+  const bar=(s)=>{const pct=Math.min(100,s.qty_min>0?Math.round(s.qty/s.qty_min*50):50);const col=s.qty===0?'#ff4d4d':s.qty<=s.minQty?'#FFD600':'#4caf50';return`<div class="stock-bar-wrap"><div class="stock-bar" style="width:${pct}%;background:${col}"></div></div> ${s.qty}`;};
   document.getElementById('stockBody').innerHTML=list.length?list.map(s=>`<tr>
     <td><code style="color:var(--y);font-size:.8rem">${s.cod||'—'}</code></td>
     <td><strong>${s.nombre}</strong><div style="font-size:.75rem;color:rgba(255,255,255,.3)">${s.desc||''}</div></td>
@@ -714,8 +714,8 @@ async function saveStockItem(){
     closeModal('modalAddStock');renderStock();showToast('✅ Guardado');
   }catch(e){showToast('⚠ '+e.message,true);}
 }
-function editStockItem(id){
-  const s=SYS.stock.find(x=>x.id==id);if(!s)return;
+async function editStockItem(id){
+  const rows=await db.get('stock',{eq:{id}});const s=rows[0];if(!s)return;
   document.getElementById('stockModalTitle').textContent='EDITAR ÍTEM';
   document.getElementById('stockEditId').value=s.id;
   document.getElementById('stCod').value=s.cod||'';document.getElementById('stNom').value=s.nombre;document.getElementById('stCatI').value=s.cat||'';document.getElementById('stDesc').value=s.desc||'';
@@ -723,7 +723,7 @@ function editStockItem(id){
   document.getElementById('stUbic').value=s.ubicacion||'';
   openModal('modalAddStock');
 }
-function deleteStockItem(id){if(!confirm('¿Eliminar?'))return;SYS.stock=SYS.stock.filter(s=>s.id!=id);saveSys();renderStock();showToast('🗑 Eliminado');}
+async function deleteStockItem(id){if(!confirm('¿Eliminar?'))return;await db.delete('stock',id);renderStock();showToast('🗑 Eliminado');}
 
 // ═══════════════════════════════
 // MOVIMIENTOS
@@ -801,12 +801,12 @@ async function saveClient(){
     document.getElementById('clientEditId').value='';
   }catch(e){showToast('⚠ '+e.message,true);}
 }
-function editClient(id){
-  const c=SYS.clientes.find(x=>x.id==id);if(!c)return;
+async function editClient(id){
+  const rows=await db.get('clientes',{eq:{id}});const c=rows[0];if(!c)return;
   document.getElementById('clientModalTitle').textContent='EDITAR CLIENTE';
   document.getElementById('clientEditId').value=c.id;document.getElementById('cRuc').value=c.ruc||'';document.getElementById('cNom').value=c.nombre;
-  document.getElementById('cTipo').value=c.tipo||'Persona Física';document.getElementById('cEmail').value=c.email||'';document.getElementById('cTel').value=c.tel||'';
-  document.getElementById('cCiudad').value=c.ciudad||'';document.getElementById('cDir').value=c.dir||'';document.getElementById('cCredito').value=c.credito||'';document.getElementById('cNotes').value=c.notas||'';
+  document.getElementById('cTipo').value=c.tipo||'Persona Física';document.getElementById('cEmail').value=c.email||'';document.getElementById('cTel').value=c.telefono||'';
+  document.getElementById('cCiudad').value=c.ciudad||'';document.getElementById('cDir').value=c.direccion||'';document.getElementById('cCredito').value=c.limite_credito||'';document.getElementById('cNotes').value=c.notas||'';
   openModal('modalAddClient');
 }
 async function deleteClient(id){if(!confirm('¿Eliminar cliente?'))return;await db.delete('clientes',id);renderClients();showToast('🗑 Eliminado');}
@@ -837,12 +837,12 @@ async function saveProv(){
     document.getElementById('provEditId').value='';
   }catch(e){showToast('⚠ '+e.message,true);}
 }
-function editProv(id){
-  const p=SYS.proveedores.find(x=>x.id==id);if(!p)return;
+async function editProv(id){
+  const rows=await db.get('proveedores',{eq:{id}});const p=rows[0];if(!p)return;
   document.getElementById('provModalTitle').textContent='EDITAR PROVEEDOR';
   document.getElementById('provEditId').value=p.id;document.getElementById('pRuc').value=p.ruc||'';document.getElementById('pNom').value=p.nombre;
-  document.getElementById('pContact').value=p.contacto||'';document.getElementById('pTel').value=p.tel||'';document.getElementById('pEmail').value=p.email||'';
-  document.getElementById('pCiudad').value=p.ciudad||'';document.getElementById('pDir').value=p.dir||'';document.getElementById('pBanco').value=p.banco||'';document.getElementById('pNotes').value=p.notas||'';
+  document.getElementById('pContact').value=p.contacto||'';document.getElementById('pTel').value=p.telefono||'';document.getElementById('pEmail').value=p.email||'';
+  document.getElementById('pCiudad').value=p.ciudad||'';document.getElementById('pDir').value=p.direccion||'';document.getElementById('pBanco').value=p.banco||'';document.getElementById('pNotes').value=p.notas||'';
   openModal('modalAddProv');
 }
 async function deleteProv(id){if(!confirm('¿Eliminar proveedor?'))return;await db.delete('proveedores',id);renderProvs();showToast('🗑 Eliminado');}
@@ -1105,9 +1105,9 @@ function numToLetras(n){
 // Preview from current form
 async function previewDoc(type){
   let html='';
-  if(type==='presupuesto'){const total=presItems.reduce((a,it)=>a+(it.subtotal||0),0);const cid=document.getElementById('presClient').value;const cl=SYS.clientes.find(c=>c.id==cid);html=await buildPresHTML({num:'PREV',fecha:new Date().toISOString().split('T')[0],clienteNom:cl?cl.nombre:'Sin cliente',items:presItems,total,notas:document.getElementById('presNotes').value,validHasta:document.getElementById('presValid').value});}
-  else if(type==='factura'){const total=facItems.reduce((a,it)=>a+(it.subtotal||0),0);const cid=document.getElementById('facClient').value;const cl=SYS.clientes.find(c=>c.id==cid);html=await buildFacHTML({num:document.getElementById('facNum').value||'PREVIEW',fecha:document.getElementById('facDate').value,clienteNom:cl?cl.nombre:'Consumidor Final',clienteRuc:cl?cl.ruc:'—',items:facItems,total,notas:document.getElementById('facNotes').value,pago:document.getElementById('facPago').value});}
-  else if(type==='recibo'){const monto=gs(document.getElementById('recMonto').value);html=await buildRecHTML({num:document.getElementById('recNum').value||'PREV',fecha:document.getElementById('recDate').value,nombre:document.getElementById('recName').value||'—',monto,concepto:document.getElementById('recConcepto').value,ref:document.getElementById('recRef').value,pago:document.getElementById('recPago').value});}
+  if(type==='presupuesto'){const total=presItems.reduce((a,it)=>a+(it.subtotal||0),0);const pcid=document.getElementById('presClient').value;const pcls=pcid?await db.get('clientes',{eq:{id:pcid}}):[];const pcl=pcls[0];html=await buildPresHTML({num:'PREV',fecha:new Date().toISOString().split('T')[0],cliente_nombre:pcl?pcl.nombre:'Sin cliente',items:presItems,total,notas:document.getElementById('presNotes').value,valido_hasta:document.getElementById('presValid').value});}
+  else if(type==='factura'){const total=facItems.reduce((a,it)=>a+(it.subtotal||0),0);const fcid=document.getElementById('facClient').value;const fcls=fcid?await db.get('clientes',{eq:{id:fcid}}):[];const fcl=fcls[0];html=await buildFacHTML({numero:document.getElementById('facNum').value||'PREVIEW',fecha:document.getElementById('facDate').value,cliente_nombre:fcl?fcl.nombre:'Consumidor Final',cliente_ruc:fcl?fcl.ruc:'—',items:facItems,total,notas:document.getElementById('facNotes').value,condicion_pago:document.getElementById('facPago').value});}
+  else if(type==='recibo'){const monto=gs(document.getElementById('recMonto').value);html=await buildRecHTML({numero:document.getElementById('recNum').value||'PREV',fecha:document.getElementById('recDate').value,pagador_nombre:document.getElementById('recName').value||'—',monto,concepto:document.getElementById('recConcepto').value,referencia:document.getElementById('recRef').value,forma_pago:document.getElementById('recPago').value});}
   showPrint(html);
 }
 
@@ -1143,8 +1143,8 @@ async function exportPDF(){
 }
 async async function exportPresPDF(){
   const total=presItems.reduce((a,it)=>a+(it.subtotal||0),0);
-  const cid=document.getElementById('presClient').value;const cl=SYS.clientes.find(c=>c.id==cid);
-  const html=await buildPresHTML({num:'PREVIEW',fecha:new Date().toISOString().split('T')[0],clienteNom:cl?cl.nombre:'Sin cliente',items:presItems,total,notas:document.getElementById('presNotes').value,validHasta:document.getElementById('presValid').value});
+  const xcid=document.getElementById('presClient').value;const xcls=xcid?await db.get('clientes',{eq:{id:xcid}}):[];const xcl=xcls[0];
+  const html=await buildPresHTML({num:'PREVIEW',fecha:new Date().toISOString().split('T')[0],cliente_nombre:pcl?pcl.nombre:'Sin cliente',items:presItems,total,notas:document.getElementById('presNotes').value,valido_hasta:document.getElementById('presValid').value});
   showPrint(html);
   setTimeout(()=>exportPDF(),300);
 }
