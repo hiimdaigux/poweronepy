@@ -531,34 +531,64 @@ textarea.fi{resize:vertical}
 
 <script>
 // ═══════════════════════════════
-// STORAGE
+// SUPABASE CLIENT
 // ═══════════════════════════════
-const LS = 'popy_sistema';
-let SYS = loadSys();
+const SUPA_URL = 'https://oyhalszdnygmjztwmpni.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im95aGFsc3pkbnlnbWp6dHdtcG5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3NTY2MTQsImV4cCI6MjA4ODMzMjYxNH0.aBBwiKab2JHd-Btg3_ZmOQl2TD4CCBwK81g7qzOMlrI';
+const _H = { 'Content-Type':'application/json', 'apikey':SUPA_KEY, 'Authorization':'Bearer '+SUPA_KEY };
 
-function loadSys(){
-  try{ return JSON.parse(localStorage.getItem(LS)) || defaultSys(); }
-  catch(e){ return defaultSys(); }
+const db = {
+  async get(table, opts={}) {
+    let url = `${SUPA_URL}/rest/v1/${table}?`;
+    if(opts.select) url+=`select=${opts.select}&`;
+    if(opts.eq) Object.entries(opts.eq).forEach(([k,v])=>url+=`${k}=eq.${encodeURIComponent(v)}&`);
+    if(opts.order) url+=`order=${opts.order}&`;
+    if(opts.limit) url+=`limit=${opts.limit}&`;
+    const r=await fetch(url,{headers:_H}); if(!r.ok)throw new Error(await r.text());
+    return await r.json();
+  },
+  async insert(table,data) {
+    const r=await fetch(`${SUPA_URL}/rest/v1/${table}`,{method:'POST',headers:{..._H,'Prefer':'return=representation'},body:JSON.stringify([data])}); if(!r.ok)throw new Error(await r.text());
+    const d=await r.json(); return d[0];
+  },
+  async update(table,id,data) {
+    const r=await fetch(`${SUPA_URL}/rest/v1/${table}?id=eq.${id}`,{method:'PATCH',headers:{..._H,'Prefer':'return=representation'},body:JSON.stringify(data)}); if(!r.ok)throw new Error(await r.text());
+    const d=await r.json(); return d[0];
+  },
+  async upsert(table,data,onConflict='id') {
+    const r=await fetch(`${SUPA_URL}/rest/v1/${table}?on_conflict=${onConflict}`,{method:'POST',headers:{..._H,'Prefer':'return=representation,resolution=merge-duplicates'},body:JSON.stringify([data])}); if(!r.ok)throw new Error(await r.text());
+    return await r.json();
+  },
+  async delete(table,id) {
+    const r=await fetch(`${SUPA_URL}/rest/v1/${table}?id=eq.${id}`,{method:'DELETE',headers:_H}); if(!r.ok)throw new Error(await r.text());
+  }
+};
+
+// Config cache
+let _cfg = null;
+async function getCfg() {
+  if(_cfg) return _cfg;
+  const r = await db.get('config',{});
+  _cfg = r[0] || { empresa:'Power One Py', ruc:'80000000-0', wa:'595981570126', email:'info@poweronepy.com', ciudad:'Asunción, Paraguay', dir:'Asunción, Paraguay', fac_nro:1, rec_nro:1, pres_nro:1 };
+  return _cfg;
 }
-function saveSys(){ localStorage.setItem(LS, JSON.stringify(SYS)); }
-
-function defaultSys(){
-  return {
-    stock:[],
-    movimientos:[],
-    clientes:[],
-    proveedores:[],
-    presupuestos:[],
-    facturas:[],
-    recibos:[],
-    config:{ empresa:'Power One Py', ruc:'80000000-0', tel:'595981570126', email:'info@poweronepy.com', ciudad:'Asunción, Paraguay', dir:'Asunción, Paraguay', facNro:1, recNro:1, presNro:1 }
-  };
+async function nextNum(field) {
+  const cfg = await getCfg();
+  const cur = cfg[field] || 1;
+  await db.upsert('config', { id:1, [field]: cur+1 }, 'id');
+  _cfg = null; // invalidate cache
+  return cur;
 }
 
 // ═══════════════════════════════
 // INIT
 // ═══════════════════════════════
-window.addEventListener('load', ()=>{
+window.addEventListener('load', async ()=>{
+  // Check auth
+  try{
+    const s=JSON.parse(localStorage.getItem('popy_auth'));
+    if(!s?.ok||(Date.now()-s.ts)>30*24*60*60*1000){location.href='admin.html';return;}
+  }catch(e){location.href='admin.html';return;}
   document.getElementById('todayDate').textContent = new Date().toLocaleDateString('es-PY',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
   const today = new Date().toISOString().split('T')[0];
   ['movDate','facDate','recDate'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=today; });
@@ -596,66 +626,68 @@ function closeModal(id){ document.getElementById(id).classList.remove('open'); d
 function gs(n){ return Number(String(n).replace(/\./g,'').replace(/,/g,'.'))||0; }
 function fmtGs(n){ return (n||0).toLocaleString('de-DE')+' Gs.'; }
 function fmtDate(d){ if(!d) return '—'; try{ return new Date(d+'T12:00').toLocaleDateString('es-PY'); }catch(e){return d;} }
-function tid(){ return Date.now(); }
 function showToast(msg,err=false){const t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(err?' err':'')+' show';clearTimeout(t._t);t._t=setTimeout(()=>t.className='toast',3200);}
 function emptyMsg(msg){ return `<div style="text-align:center;padding:2rem;color:rgba(255,255,255,.2);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:.88rem">${msg}</div>`; }
-function populateSelects(){
-  // clients
+async function populateSelects(){
+  const [clientes,proveedores,stock]=await Promise.all([
+    db.get('clientes',{order:'nombre.asc'}),
+    db.get('proveedores',{order:'nombre.asc'}),
+    db.get('stock',{order:'nombre.asc'}),
+  ]);
   ['presClient','facClient','recClient'].forEach(id=>{
     const el=document.getElementById(id); if(!el) return;
     const first = id==='presClient'?'<option value="">Sin cliente / Walk-in</option>':'<option value="">Consumidor Final</option>';
-    el.innerHTML=first+(SYS.clientes||[]).map(c=>`<option value="${c.id}">${c.nombre} (${c.ruc})</option>`).join('');
+    el.innerHTML=first+clientes.map(c=>`<option value="${c.id}">${c.nombre} (${c.ruc||'—'})</option>`).join('');
   });
-  // providers
-  ['stProv'].forEach(id=>{
-    const el=document.getElementById(id); if(!el) return;
-    el.innerHTML='<option value="">Sin asignar</option>'+(SYS.proveedores||[]).map(p=>`<option value="${p.id}">${p.nombre}</option>`).join('');
-  });
-  // products for mov
-  const mp=document.getElementById('movProd'); if(mp) mp.innerHTML='<option value="">Seleccionar...</option>'+(SYS.stock||[]).map(s=>`<option value="${s.id}">${s.nombre} [${s.cod||'—'}]</option>`).join('');
-  // stock cat filter
-  const cf=document.getElementById('stockCatFilter'); if(cf){ const cats=[...new Set((SYS.stock||[]).map(s=>s.cat).filter(Boolean))]; cf.innerHTML='<option value="">Todas las categorías</option>'+cats.map(c=>`<option>${c}</option>`).join('');}
+  const sp=document.getElementById('stProv'); if(sp) sp.innerHTML='<option value="">Sin asignar</option>'+proveedores.map(p=>`<option value="${p.id}">${p.nombre}</option>`).join('');
+  const mp=document.getElementById('movProd'); if(mp) mp.innerHTML='<option value="">Seleccionar...</option>'+stock.map(s=>`<option value="${s.id}">${s.nombre} [${s.cod||'—'}]</option>`).join('');
+  const cf=document.getElementById('stockCatFilter'); if(cf){const cats=[...new Set(stock.map(s=>s.categoria).filter(Boolean))];cf.innerHTML='<option value="">Todas las categorías</option>'+cats.map(c=>`<option>${c}</option>`).join('');}
 }
 
 // ═══════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════
-function renderDashboard(){
-  const totFac = (SYS.facturas||[]).reduce((a,f)=>a+f.total,0);
-  const lowStock = (SYS.stock||[]).filter(s=>s.qty<=s.minQty);
+async function renderDashboard(){
+  const [stockList,facturasAll,clientesList,movList]=await Promise.all([
+    db.get('stock',{order:'nombre.asc'}),
+    db.get('facturas',{select:'total',limit:500}),
+    db.get('clientes',{select:'id',limit:500}),
+    db.get('movimientos',{order:'created_at.desc',limit:20}),
+  ]);
+  const lowStock=stockList.filter(s=>s.qty<=s.qty_min);
   document.getElementById('dashStats').innerHTML=`
-    <div class="sc yellow"><div class="sc-num">${(SYS.stock||[]).length}</div><div class="sc-label">Ítems en stock</div></div>
+    <div class="sc yellow"><div class="sc-num">${stockList.length}</div><div class="sc-label">Ítems en stock</div></div>
     <div class="sc red"><div class="sc-num">${lowStock.length}</div><div class="sc-label">Stock bajo</div></div>
-    <div class="sc green"><div class="sc-num">${(SYS.facturas||[]).length}</div><div class="sc-label">Facturas</div></div>
-    <div class="sc blue"><div class="sc-num">${(SYS.clientes||[]).length}</div><div class="sc-label">Clientes</div></div>`;
+    <div class="sc green"><div class="sc-num">${facturasAll.length}</div><div class="sc-label">Facturas</div></div>
+    <div class="sc blue"><div class="sc-num">${clientesList.length}</div><div class="sc-label">Clientes</div></div>`;
   // Last movements
-  const movs=[...(SYS.movimientos||[])].reverse().slice(0,8);
+  const movs=[...movList].slice(0,8);
   document.getElementById('dashMovs').innerHTML=movs.length
-    ?movs.map(m=>`<div style="display:flex;justify-content:space-between;padding:.55rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.84rem"><span class="${m.tipo==='entrada'?'mov-in':'mov-out'}">${m.tipo==='entrada'?'↑':'↓'} ${m.prod}</span><span style="color:rgba(255,255,255,.4)">${fmtDate(m.fecha)} · ${m.qty} u.</span></div>`).join('')
+    ?movs.map(m=>`<div style="display:flex;justify-content:space-between;padding:.55rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.84rem"><span class="${m.tipo==='entrada'?'mov-in':'mov-out'}">${m.tipo==='entrada'?'↑':'↓'} ${m.producto_nombre}</span><span style="color:rgba(255,255,255,.4)">${fmtDate(m.fecha)} · ${m.cantidad} u.</span></div>`).join('')
     :emptyMsg('Sin movimientos');
   // Low stock
   document.getElementById('dashLowStock').innerHTML=lowStock.length
-    ?lowStock.map(s=>`<div style="display:flex;justify-content:space-between;padding:.55rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.84rem"><span>${s.nombre}</span><span class="${s.qty===0?'badge badge-r':'badge badge-y'}">${s.qty} / ${s.minQty}</span></div>`).join('')
+    ?lowStock.map(s=>`<div style="display:flex;justify-content:space-between;padding:.55rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.84rem"><span>${s.nombre}</span><span class="${s.qty===0?'badge badge-r':'badge badge-y'}">${s.qty} / ${s.qty_min}</span></div>`).join('')
     :emptyMsg('Todos OK ✓');
   // Summaries
-  const lastFac=[...(SYS.facturas||[])].reverse().slice(0,4);
-  document.getElementById('dashFacturas').innerHTML=lastFac.length?lastFac.map(f=>`<div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem"><span>${f.num||'—'}</span><span style="color:var(--y)">${fmtGs(f.total)}</span></div>`).join(''):emptyMsg('Sin facturas');
-  const lastPres=[...(SYS.presupuestos||[])].reverse().slice(0,4);
-  document.getElementById('dashPresupuestos').innerHTML=lastPres.length?lastPres.map(p=>`<div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem"><span>Pres. #${p.num}</span><span style="color:var(--y)">${fmtGs(p.total)}</span></div>`).join(''):emptyMsg('Sin presupuestos');
-  const lastCli=[...(SYS.clientes||[])].reverse().slice(0,4);
+  const lastFac=[...facturasAll].slice(0,4);
+  document.getElementById('dashFacturas').innerHTML=lastFac.length?lastFac.map(f=>`<div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem"><span>${f.numero||'—'}</span><span style="color:var(--y)">${fmtGs(f.total)}</span></div>`).join(''):emptyMsg('Sin facturas');
+  const lastPres=(await db.get('presupuestos',{order:'created_at.desc',limit:4}));
+  document.getElementById('dashPresupuestos').innerHTML=lastPres.length?lastPres.map(p=>`<div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem"><span>Pres. #${p.numero}</span><span style="color:var(--y)">${fmtGs(p.total)}</span></div>`).join(''):emptyMsg('Sin presupuestos');
+  const lastCli=(await db.get('clientes',{order:'created_at.desc',limit:4}));
   document.getElementById('dashClientes').innerHTML=lastCli.length?lastCli.map(c=>`<div style="padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem">${c.nombre}</div>`).join(''):emptyMsg('Sin clientes');
 }
 
 // ═══════════════════════════════
 // STOCK
 // ═══════════════════════════════
-function renderStock(){
+async function renderStock(){
   populateSelects();
   const q=(document.getElementById('stockSearch').value||'').toLowerCase();
   const cf=(document.getElementById('stockCatFilter').value||'');
-  let list=SYS.stock||[];
-  if(q) list=list.filter(s=>(s.nombre+s.cod+s.cat).toLowerCase().includes(q));
-  if(cf) list=list.filter(s=>s.cat===cf);
+  let list = await db.get('stock',{order:'nombre.asc'});
+  if(q) list=list.filter(s=>(s.nombre+(s.cod||'')+(s.categoria||'')).toLowerCase().includes(q));
+  if(cf) list=list.filter(s=>s.categoria===cf);
   document.getElementById('stockCount').textContent=list.length;
   const bar=(s)=>{const pct=Math.min(100,s.minQty>0?Math.round(s.qty/s.minQty*50):50);const col=s.qty===0?'#ff4d4d':s.qty<=s.minQty?'#FFD600':'#4caf50';return`<div class="stock-bar-wrap"><div class="stock-bar" style="width:${pct}%;background:${col}"></div></div> ${s.qty}`;};
   document.getElementById('stockBody').innerHTML=list.length?list.map(s=>`<tr>
@@ -668,15 +700,19 @@ function renderStock(){
     <td><div class="actions"><button class="btn btn-ghost btn-sm" onclick="editStockItem(${s.id})">✏</button><button class="btn btn-r btn-sm" onclick="deleteStockItem(${s.id})">🗑</button></div></td>
   </tr>`).join(''):`<tr><td colspan="9" style="text-align:center;padding:2rem;color:rgba(255,255,255,.25)">Sin ítems. Agregá uno arriba.</td></tr>`;
 }
-function saveStockItem(){
-  const cod=document.getElementById('stCod').value.trim(),nombre=document.getElementById('stNom').value.trim(),cat=document.getElementById('stCatI').value.trim(),desc=document.getElementById('stDesc').value.trim();
+async function saveStockItem(){
+  const cod=document.getElementById('stCod').value.trim(),nombre=document.getElementById('stNom').value.trim();
   if(!nombre){showToast('Ingresá el nombre',true);return;}
-  const qty=parseInt(document.getElementById('stQty').value)||0,minQty=parseInt(document.getElementById('stMin').value)||0;
-  const costo=document.getElementById('stCosto').value.trim(),venta=document.getElementById('stVenta').value.trim(),prov=document.getElementById('stProv').value,ubicacion=document.getElementById('stUbic').value.trim();
+  const cat=document.getElementById('stCatI').value.trim(),descripcion=document.getElementById('stDesc').value.trim();
+  const qty=parseInt(document.getElementById('stQty').value)||0,qty_min=parseInt(document.getElementById('stMin').value)||0;
+  const precio_costo=document.getElementById('stCosto').value.trim(),precio_venta=document.getElementById('stVenta').value.trim();
+  const proveedor_id=document.getElementById('stProv').value||null,ubicacion=document.getElementById('stUbic').value.trim();
   const editId=document.getElementById('stockEditId').value;
-  if(editId){const idx=SYS.stock.findIndex(s=>s.id==editId);if(idx>-1)SYS.stock[idx]={...SYS.stock[idx],cod,nombre,cat,desc,qty,minQty,costo,venta,prov,ubicacion};}
-  else{SYS.stock.push({id:tid(),cod,nombre,cat,desc,qty,minQty,costo,venta,prov,ubicacion});}
-  saveSys();closeModal('modalAddStock');renderStock();showToast('✅ Guardado');
+  try{
+    if(editId){ await db.update('stock',editId,{cod,nombre,categoria:cat,descripcion,qty,qty_min,precio_costo,precio_venta,ubicacion,updated_at:new Date().toISOString()}); }
+    else{ await db.insert('stock',{cod,nombre,categoria:cat,descripcion,qty,qty_min,precio_costo,precio_venta,proveedor_id,ubicacion}); }
+    closeModal('modalAddStock');renderStock();showToast('✅ Guardado');
+  }catch(e){showToast('⚠ '+e.message,true);}
 }
 function editStockItem(id){
   const s=SYS.stock.find(x=>x.id==id);if(!s)return;
@@ -692,65 +728,78 @@ function deleteStockItem(id){if(!confirm('¿Eliminar?'))return;SYS.stock=SYS.sto
 // ═══════════════════════════════
 // MOVIMIENTOS
 // ═══════════════════════════════
-function renderMovs(){
+async function renderMovs(){
   const tf=document.getElementById('movTypeFilter').value;
   const df=document.getElementById('movDateFrom').value;
   const dt=document.getElementById('movDateTo').value;
-  let list=[...(SYS.movimientos||[])].reverse();
+  let list = await db.get('movimientos',{order:'created_at.desc',limit:200});
   if(tf)list=list.filter(m=>m.tipo===tf);
   if(df)list=list.filter(m=>m.fecha>=df);
   if(dt)list=list.filter(m=>m.fecha<=dt);
   document.getElementById('movBody').innerHTML=list.length?list.map(m=>`<tr>
     <td>${fmtDate(m.fecha)}</td>
     <td><span class="badge ${m.tipo==='entrada'?'badge-g':m.tipo==='salida'?'badge-r':'badge-y'}">${m.tipo}</span></td>
-    <td>${m.prod}</td><td class="${m.tipo==='entrada'?'mov-in':'mov-out'}">${m.tipo==='ajuste'?'':m.tipo==='entrada'?'+':'−'}${m.qty}</td>
-    <td>${m.precio?fmtGs(gs(m.precio)):'—'}</td><td style="color:var(--y)">${m.precio?fmtGs(gs(m.precio)*m.qty):'—'}</td>
-    <td>${m.contacto||'—'}</td><td style="font-size:.8rem;color:rgba(255,255,255,.4)">${m.ref||'—'}</td>
+    <td>${m.producto_nombre}</td><td class="${m.tipo==='entrada'?'mov-in':'mov-out'}">${m.tipo==='ajuste'?'':m.tipo==='entrada'?'+':'−'}${m.cantidad}</td>
+    <td>${m.precio_unitario?fmtGs(gs(m.precio_unitario)):'—'}</td><td style="color:var(--y)">${m.precio_unitario?fmtGs(gs(m.precio_unitario)*m.cantidad):'—'}</td>
+    <td>${m.contacto||'—'}</td><td style="font-size:.8rem;color:rgba(255,255,255,.4)">${m.referencia||'—'}</td>
     <td style="font-size:.8rem;color:rgba(255,255,255,.4)">${m.notas||''}</td>
   </tr>`).join(''):`<tr><td colspan="9" style="text-align:center;padding:2rem;color:rgba(255,255,255,.25)">Sin movimientos registrados.</td></tr>`;
 }
-function saveMov(){
-  const prod=document.getElementById('movProd').value;
-  if(!prod){showToast('Seleccioná un producto',true);return;}
-  const s=SYS.stock.find(x=>x.id==prod);
+async function saveMov(){
+  const stockId=document.getElementById('movProd').value;
+  if(!stockId){showToast('Seleccioná un producto',true);return;}
   const qty=parseInt(document.getElementById('movQty').value)||1;
   const tipo=document.getElementById('movType').value;
   const fecha=document.getElementById('movDate').value||new Date().toISOString().split('T')[0];
-  SYS.movimientos.push({id:tid(),tipo,fecha,prod:s?s.nombre:'?',prodId:prod,qty,precio:document.getElementById('movPrice').value.trim(),contacto:document.getElementById('movContact').value.trim(),ref:document.getElementById('movRef').value.trim(),notas:document.getElementById('movNotes').value.trim()});
-  // Update stock
-  if(s){if(tipo==='entrada')s.qty+=qty;else if(tipo==='salida')s.qty=Math.max(0,s.qty-qty);else s.qty=qty;}
-  saveSys();closeModal('modalAddMov');renderMovs();showToast('✅ Movimiento registrado');
+  // Get product name
+  const stockList = await db.get('stock',{eq:{id:stockId}});
+  const s = stockList[0];
+  try{
+    await db.insert('movimientos',{tipo,fecha,stock_id:stockId,producto_nombre:s?s.nombre:'?',cantidad:qty,precio_unitario:document.getElementById('movPrice').value.trim(),contacto:document.getElementById('movContact').value.trim(),referencia:document.getElementById('movRef').value.trim(),notas:document.getElementById('movNotes').value.trim()});
+    // Update stock qty
+    if(s){
+      let newQty = s.qty;
+      if(tipo==='entrada') newQty += qty;
+      else if(tipo==='salida') newQty = Math.max(0, s.qty - qty);
+      else newQty = qty;
+      await db.update('stock',stockId,{qty:newQty,updated_at:new Date().toISOString()});
+    }
+    closeModal('modalAddMov');renderMovs();showToast('✅ Movimiento registrado');
+  }catch(e){showToast('⚠ '+e.message,true);}
 }
 
 // ═══════════════════════════════
 // CLIENTES
 // ═══════════════════════════════
-function renderClients(){
+async function renderClients(){
   const q=(document.getElementById('clientSearch').value||'').toLowerCase();
-  let list=SYS.clientes||[];
-  if(q)list=list.filter(c=>(c.nombre+c.ruc+c.email).toLowerCase().includes(q));
+  let list = await db.get('clientes',{order:'nombre.asc'});
+  if(q) list=list.filter(c=>(c.nombre+(c.ruc||'')+(c.email||'')).toLowerCase().includes(q));
   document.getElementById('clientCount').textContent=list.length;
-  const totalCompras=c=>(SYS.facturas||[]).filter(f=>f.clienteId==c.id).reduce((a,f)=>a+f.total,0);
-  const cntFac=c=>(SYS.facturas||[]).filter(f=>f.clienteId==c.id).length;
+  const facturas = await db.get('facturas',{select:'cliente_id,total',order:'id.desc',limit:500});
+  const totalCompras=c=>facturas.filter(f=>f.cliente_id==c.id).reduce((a,f)=>a+(f.total||0),0);
+  const cntFac=c=>facturas.filter(f=>f.cliente_id==c.id).length;
   document.getElementById('clientBody').innerHTML=list.length?list.map(c=>`<tr>
     <td><code style="color:var(--y);font-size:.8rem">${c.ruc||'—'}</code></td>
     <td><strong>${c.nombre}</strong><div style="font-size:.75rem;color:rgba(255,255,255,.3)">${c.tipo}</div></td>
-    <td>${c.email||'—'}</td><td>${c.tel||'—'}</td><td>${c.ciudad||'—'}</td>
+    <td>${c.email||'—'}</td><td>${c.telefono||'—'}</td><td>${c.ciudad||'—'}</td>
     <td><span class="badge badge-b">${cntFac(c)}</span></td>
     <td style="color:var(--y)">${fmtGs(totalCompras(c))}</td>
     <td><div class="actions"><button class="btn btn-ghost btn-sm" onclick="editClient(${c.id})">✏</button><button class="btn btn-r btn-sm" onclick="deleteClient(${c.id})">🗑</button></div></td>
   </tr>`).join(''):`<tr><td colspan="8" style="text-align:center;padding:2rem;color:rgba(255,255,255,.25)">Sin clientes. Agregá uno.</td></tr>`;
 }
-function saveClient(){
-  const nombre=document.getElementById('cNom').value.trim(),ruc=document.getElementById('cRuc').value.trim();
+async function saveClient(){
+  const nombre=document.getElementById('cNom').value.trim();
   if(!nombre){showToast('Nombre obligatorio',true);return;}
-  const data={id:document.getElementById('clientEditId').value||tid(),nombre,ruc,tipo:document.getElementById('cTipo').value,email:document.getElementById('cEmail').value.trim(),tel:document.getElementById('cTel').value.trim(),ciudad:document.getElementById('cCiudad').value.trim(),dir:document.getElementById('cDir').value.trim(),credito:document.getElementById('cCredito').value.trim(),notas:document.getElementById('cNotes').value.trim()};
+  const data={nombre,ruc:document.getElementById('cRuc').value.trim(),tipo:document.getElementById('cTipo').value,email:document.getElementById('cEmail').value.trim(),telefono:document.getElementById('cTel').value.trim(),ciudad:document.getElementById('cCiudad').value.trim(),direccion:document.getElementById('cDir').value.trim(),limite_credito:parseFloat(document.getElementById('cCredito').value)||0,notas:document.getElementById('cNotes').value.trim()};
   const editId=document.getElementById('clientEditId').value;
-  if(editId){const idx=SYS.clientes.findIndex(c=>c.id==editId);if(idx>-1)SYS.clientes[idx]=data;}
-  else{SYS.clientes.push(data);}
-  saveSys();closeModal('modalAddClient');renderClients();showToast('✅ Cliente guardado');
-  ['cRuc','cNom','cEmail','cTel','cCiudad','cDir','cCredito','cNotes'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('clientEditId').value='';
+  try{
+    if(editId){await db.update('clientes',editId,data);}
+    else{await db.insert('clientes',data);}
+    closeModal('modalAddClient');renderClients();showToast('✅ Cliente guardado');
+    ['cRuc','cNom','cEmail','cTel','cCiudad','cDir','cCredito','cNotes'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('clientEditId').value='';
+  }catch(e){showToast('⚠ '+e.message,true);}
 }
 function editClient(id){
   const c=SYS.clientes.find(x=>x.id==id);if(!c)return;
@@ -760,31 +809,33 @@ function editClient(id){
   document.getElementById('cCiudad').value=c.ciudad||'';document.getElementById('cDir').value=c.dir||'';document.getElementById('cCredito').value=c.credito||'';document.getElementById('cNotes').value=c.notas||'';
   openModal('modalAddClient');
 }
-function deleteClient(id){if(!confirm('¿Eliminar cliente?'))return;SYS.clientes=SYS.clientes.filter(c=>c.id!=id);saveSys();renderClients();showToast('🗑 Eliminado');}
+async function deleteClient(id){if(!confirm('¿Eliminar cliente?'))return;await db.delete('clientes',id);renderClients();showToast('🗑 Eliminado');}
 
 // ═══════════════════════════════
 // PROVEEDORES
 // ═══════════════════════════════
-function renderProvs(){
+async function renderProvs(){
   const q=(document.getElementById('provSearch').value||'').toLowerCase();
-  let list=SYS.proveedores||[];
-  if(q)list=list.filter(p=>(p.nombre+p.ruc).toLowerCase().includes(q));
+  let list = await db.get('proveedores',{order:'nombre.asc'});
+  if(q)list=list.filter(p=>(p.nombre+(p.ruc||'')).toLowerCase().includes(q));
   document.getElementById('provCount').textContent=list.length;
   document.getElementById('provBody').innerHTML=list.length?list.map(p=>`<tr>
     <td><code style="color:var(--y);font-size:.8rem">${p.ruc||'—'}</code></td>
-    <td><strong>${p.nombre}</strong></td><td>${p.contacto||'—'}</td><td>${p.tel||'—'}</td><td>${p.email||'—'}</td><td>${p.ciudad||'—'}</td><td style="font-size:.8rem;color:rgba(255,255,255,.4)">${p.banco||'—'}</td>
+    <td><strong>${p.nombre}</strong></td><td>${p.contacto||'—'}</td><td>${p.telefono||'—'}</td><td>${p.email||'—'}</td><td>${p.ciudad||'—'}</td><td style="font-size:.8rem;color:rgba(255,255,255,.4)">${p.banco||'—'}</td>
     <td><div class="actions"><button class="btn btn-ghost btn-sm" onclick="editProv(${p.id})">✏</button><button class="btn btn-r btn-sm" onclick="deleteProv(${p.id})">🗑</button></div></td>
   </tr>`).join(''):`<tr><td colspan="8" style="text-align:center;padding:2rem;color:rgba(255,255,255,.25)">Sin proveedores.</td></tr>`;
 }
-function saveProv(){
-  const nombre=document.getElementById('pNom').value.trim(),ruc=document.getElementById('pRuc').value.trim();
+async function saveProv(){
+  const nombre=document.getElementById('pNom').value.trim();
   if(!nombre){showToast('Nombre obligatorio',true);return;}
-  const data={id:document.getElementById('provEditId').value||tid(),nombre,ruc,contacto:document.getElementById('pContact').value.trim(),tel:document.getElementById('pTel').value.trim(),email:document.getElementById('pEmail').value.trim(),ciudad:document.getElementById('pCiudad').value.trim(),dir:document.getElementById('pDir').value.trim(),banco:document.getElementById('pBanco').value.trim(),notas:document.getElementById('pNotes').value.trim()};
+  const data={nombre,ruc:document.getElementById('pRuc').value.trim(),contacto:document.getElementById('pContact').value.trim(),telefono:document.getElementById('pTel').value.trim(),email:document.getElementById('pEmail').value.trim(),ciudad:document.getElementById('pCiudad').value.trim(),direccion:document.getElementById('pDir').value.trim(),banco:document.getElementById('pBanco').value.trim(),notas:document.getElementById('pNotes').value.trim()};
   const editId=document.getElementById('provEditId').value;
-  if(editId){const idx=SYS.proveedores.findIndex(p=>p.id==editId);if(idx>-1)SYS.proveedores[idx]=data;}
-  else SYS.proveedores.push(data);
-  saveSys();closeModal('modalAddProv');renderProvs();showToast('✅ Proveedor guardado');
-  document.getElementById('provEditId').value='';
+  try{
+    if(editId){await db.update('proveedores',editId,data);}
+    else{await db.insert('proveedores',data);}
+    closeModal('modalAddProv');renderProvs();showToast('✅ Proveedor guardado');
+    document.getElementById('provEditId').value='';
+  }catch(e){showToast('⚠ '+e.message,true);}
 }
 function editProv(id){
   const p=SYS.proveedores.find(x=>x.id==id);if(!p)return;
@@ -794,7 +845,7 @@ function editProv(id){
   document.getElementById('pCiudad').value=p.ciudad||'';document.getElementById('pDir').value=p.dir||'';document.getElementById('pBanco').value=p.banco||'';document.getElementById('pNotes').value=p.notas||'';
   openModal('modalAddProv');
 }
-function deleteProv(id){if(!confirm('¿Eliminar proveedor?'))return;SYS.proveedores=SYS.proveedores.filter(p=>p.id!=id);saveSys();renderProvs();showToast('🗑 Eliminado');}
+async function deleteProv(id){if(!confirm('¿Eliminar proveedor?'))return;await db.delete('proveedores',id);renderProvs();showToast('🗑 Eliminado');}
 
 // ═══════════════════════════════
 // PRESUPUESTOS — Items
@@ -823,22 +874,25 @@ function renderPresTotal(){
   document.getElementById('presTotalDisplay').textContent=fmtGs(total);
 }
 function clearPres(){presItems=[{desc:'',qty:1,precio:'',subtotal:0}];document.getElementById('presClient').value='';document.getElementById('presNotes').value='';document.getElementById('presFormTitle').textContent='NUEVO PRESUPUESTO';const v=new Date();v.setDate(v.getDate()+30);document.getElementById('presValid').value=v.toISOString().split('T')[0];renderPresItems();}
-function savePresupuesto(){
+async function savePresupuesto(){
   const total=presItems.reduce((a,it)=>a+(it.subtotal||0),0);
-  const num=SYS.config.presNro++;
-  const clienteId=document.getElementById('presClient').value;
-  const cliente=SYS.clientes.find(c=>c.id==clienteId);
-  SYS.presupuestos.push({id:tid(),num,fecha:new Date().toISOString().split('T')[0],clienteId,clienteNom:cliente?cliente.nombre:'Sin cliente',items:[...presItems],total,notas:document.getElementById('presNotes').value,validHasta:document.getElementById('presValid').value,estado:'vigente'});
-  saveSys();renderPresHistory();showToast(`✅ Presupuesto #${num} guardado`);
+  const num=await nextNum('pres_nro');
+  const clienteId=document.getElementById('presClient').value||null;
+  const clientes=clienteId?await db.get('clientes',{eq:{id:clienteId}}):[];
+  const cliente=clientes[0];
+  try{
+    await db.insert('presupuestos',{numero:num,fecha:new Date().toISOString().split('T')[0],cliente_id:clienteId,cliente_nombre:cliente?cliente.nombre:'Sin cliente',items:presItems,total,notas:document.getElementById('presNotes').value,valido_hasta:document.getElementById('presValid').value,estado:'vigente'});
+    renderPresHistory();showToast(`✅ Presupuesto #${num} guardado`);
+  }catch(e){showToast('⚠ '+e.message,true);}
 }
-function renderPresHistory(){
-  const list=[...(SYS.presupuestos||[])].reverse();
+async function renderPresHistory(){
+  const list=await db.get('presupuestos',{order:'created_at.desc',limit:50});
   document.getElementById('presHistory').innerHTML=list.length?list.map(p=>`<div style="padding:.9rem;border-bottom:1px solid rgba(255,255,255,.05)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">
-      <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem">Pres. #${p.num}</span>
+      <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem">Pres. #${p.numero}</span>
       <span style="color:var(--y);font-family:'Bebas Neue',sans-serif;font-size:1.1rem">${fmtGs(p.total)}</span>
     </div>
-    <div style="font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:.5rem">${p.clienteNom} · ${fmtDate(p.fecha)}</div>
+    <div style="font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:.5rem">${p.cliente_nombre} · ${fmtDate(p.fecha)}</div>
     <div style="display:flex;gap:.4rem;flex-wrap:wrap">
       <button class="btn btn-b btn-sm" onclick="previewDocFromData('presupuesto',${p.id})">👁</button>
       <button class="btn btn-g btn-sm" onclick="exportPresFromData(${p.id})">PDF</button>
@@ -846,7 +900,7 @@ function renderPresHistory(){
     </div>
   </div>`).join(''):emptyMsg('Sin presupuestos');
 }
-function deletePres(id){if(!confirm('¿Eliminar?'))return;SYS.presupuestos=SYS.presupuestos.filter(p=>p.id!=id);saveSys();renderPresHistory();showToast('🗑 Eliminado');}
+async function deletePres(id){if(!confirm('¿Eliminar?'))return;await db.delete('presupuestos',id);renderPresHistory();showToast('🗑 Eliminado');}
 
 // ═══════════════════════════════
 // FACTURAS
@@ -872,23 +926,26 @@ function renderFacItems(){
 }
 function renderFacTotal(){const total=facItems.reduce((a,it)=>a+(it.subtotal||0),0);document.getElementById('facTotalDisplay').textContent=fmtGs(total);}
 function clearFac(){facItems=[{desc:'',qty:1,precio:'',subtotal:0}];document.getElementById('facClient').value='';document.getElementById('facNotes').value='';document.getElementById('facDate').value=new Date().toISOString().split('T')[0];document.getElementById('facNum').value='';document.getElementById('facFormTitle').textContent='NUEVA FACTURA';renderFacItems();}
-function saveFactura(){
+async function saveFactura(){
   const total=facItems.reduce((a,it)=>a+(it.subtotal||0),0);
-  const num=SYS.config.facNro++;
-  const clienteId=document.getElementById('facClient').value;
-  const cliente=SYS.clientes.find(c=>c.id==clienteId);
+  const num=await nextNum('fac_nro');
+  const clienteId=document.getElementById('facClient').value||null;
+  const clientes=clienteId?await db.get('clientes',{eq:{id:clienteId}}):[];
+  const cliente=clientes[0];
   const facNumVal=document.getElementById('facNum').value.trim()||`001-001-${String(num).padStart(7,'0')}`;
-  SYS.facturas.push({id:tid(),num:facNumVal,numInt:num,fecha:document.getElementById('facDate').value,clienteId,clienteNom:cliente?cliente.nombre:'Consumidor Final',clienteRuc:cliente?cliente.ruc:'—',items:[...facItems],total,notas:document.getElementById('facNotes').value,pago:document.getElementById('facPago').value});
-  saveSys();renderFacHistory();showToast(`✅ Factura ${facNumVal} guardada`);
+  try{
+    await db.insert('facturas',{numero:facNumVal,numero_interno:num,fecha:document.getElementById('facDate').value,cliente_id:clienteId,cliente_nombre:cliente?cliente.nombre:'Consumidor Final',cliente_ruc:cliente?cliente.ruc:'—',items:facItems,total,condicion_pago:document.getElementById('facPago').value,notas:document.getElementById('facNotes').value});
+    renderFacHistory();showToast(`✅ Factura ${facNumVal} guardada`);
+  }catch(e){showToast('⚠ '+e.message,true);}
 }
-function renderFacHistory(){
-  const list=[...(SYS.facturas||[])].reverse();
+async function renderFacHistory(){
+  const list=await db.get('facturas',{order:'created_at.desc',limit:50});
   document.getElementById('facHistory').innerHTML=list.length?list.map(f=>`<div style="padding:.9rem;border-bottom:1px solid rgba(255,255,255,.05)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">
       <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem">${f.num}</span>
       <span style="color:var(--y);font-family:'Bebas Neue',sans-serif;font-size:1.1rem">${fmtGs(f.total)}</span>
     </div>
-    <div style="font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:.5rem">${f.clienteNom} · ${fmtDate(f.fecha)}</div>
+    <div style="font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:.5rem">${f.cliente_nombre} · ${fmtDate(f.fecha)}</div>
     <div style="display:flex;gap:.4rem">
       <button class="btn btn-b btn-sm" onclick="previewDocFromData('factura',${f.id})">👁</button>
       <button class="btn btn-g btn-sm" onclick="printDocFromData('factura',${f.id})">🖨</button>
@@ -896,32 +953,36 @@ function renderFacHistory(){
     </div>
   </div>`).join(''):emptyMsg('Sin facturas');
 }
-function deleteFac(id){if(!confirm('¿Eliminar factura?'))return;SYS.facturas=SYS.facturas.filter(f=>f.id!=id);saveSys();renderFacHistory();showToast('🗑 Eliminada');}
+async function deleteFac(id){if(!confirm('¿Eliminar factura?'))return;await db.delete('facturas',id);renderFacHistory();showToast('🗑 Eliminada');}
 
 // ═══════════════════════════════
 // RECIBOS
 // ═══════════════════════════════
 function clearRec(){['recName','recMonto','recConcepto','recRef'].forEach(id=>document.getElementById(id).value='');document.getElementById('recDate').value=new Date().toISOString().split('T')[0];document.getElementById('recNum').value='';document.getElementById('recTotalDisplay').textContent='Gs. 0';}
 function updateRecTotal(){const v=gs(document.getElementById('recMonto').value);document.getElementById('recTotalDisplay').textContent=fmtGs(v);}
-function saveRecibo(){
-  const monto=gs(document.getElementById('recMonto').value);const concepto=document.getElementById('recConcepto').value.trim();
+async function saveRecibo(){
+  const monto=gs(document.getElementById('recMonto').value);
+  const concepto=document.getElementById('recConcepto').value.trim();
   if(!concepto){showToast('El concepto es obligatorio',true);return;}
-  const num=SYS.config.recNro++;
-  const clienteId=document.getElementById('recClient').value;
-  const cliente=SYS.clientes.find(c=>c.id==clienteId);
-  const nombre=document.getElementById('recName').value.trim()||cliente?.nombre||'—';
+  const num=await nextNum('rec_nro');
+  const clienteId=document.getElementById('recClient').value||null;
+  const clientes=clienteId?await db.get('clientes',{eq:{id:clienteId}}):[];
+  const cliente=clientes[0];
+  const nombre=document.getElementById('recName').value.trim()||(cliente?cliente.nombre:'')||'—';
   const recNum=document.getElementById('recNum').value.trim()||`001-001-${String(num).padStart(7,'0')}`;
-  SYS.recibos.push({id:tid(),num:recNum,numInt:num,fecha:document.getElementById('recDate').value,clienteId,nombre,monto,concepto,ref:document.getElementById('recRef').value.trim(),pago:document.getElementById('recPago').value});
-  saveSys();renderRecHistory();showToast(`✅ Recibo ${recNum} guardado`);
+  try{
+    await db.insert('recibos',{numero:recNum,numero_interno:num,fecha:document.getElementById('recDate').value,cliente_id:clienteId,pagador_nombre:nombre,monto,concepto,forma_pago:document.getElementById('recPago').value,referencia:document.getElementById('recRef').value.trim()});
+    renderRecHistory();showToast(`✅ Recibo ${recNum} guardado`);
+  }catch(e){showToast('⚠ '+e.message,true);}
 }
-function renderRecHistory(){
-  const list=[...(SYS.recibos||[])].reverse();
+async function renderRecHistory(){
+  const list=await db.get('recibos',{order:'created_at.desc',limit:50});
   document.getElementById('recHistory').innerHTML=list.length?list.map(r=>`<div style="padding:.9rem;border-bottom:1px solid rgba(255,255,255,.05)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">
       <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem">${r.num}</span>
       <span style="color:var(--y);font-family:'Bebas Neue',sans-serif;font-size:1.1rem">${fmtGs(r.monto)}</span>
     </div>
-    <div style="font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:.5rem">${r.nombre} · ${fmtDate(r.fecha)}</div>
+    <div style="font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:.5rem">${r.pagador_nombre} · ${fmtDate(r.fecha)}</div>
     <div style="display:flex;gap:.4rem">
       <button class="btn btn-b btn-sm" onclick="previewDocFromData('recibo',${r.id})">👁</button>
       <button class="btn btn-g btn-sm" onclick="printDocFromData('recibo',${r.id})">🖨</button>
@@ -929,14 +990,16 @@ function renderRecHistory(){
     </div>
   </div>`).join(''):emptyMsg('Sin recibos');
 }
-function deleteRec(id){if(!confirm('¿Eliminar recibo?'))return;SYS.recibos=SYS.recibos.filter(r=>r.id!=id);saveSys();renderRecHistory();showToast('🗑 Eliminado');}
+async function deleteRec(id){if(!confirm('¿Eliminar recibo?'))return;await db.delete('recibos',id);renderRecHistory();showToast('🗑 Eliminado');}
 
 // ═══════════════════════════════
 // REPORTES
 // ═══════════════════════════════
-function renderReportes(){
-  const ventas=SYS.facturas||[];const totalVentas=ventas.reduce((a,f)=>a+f.total,0);
-  const movIn=(SYS.movimientos||[]).filter(m=>m.tipo==='entrada');const movOut=(SYS.movimientos||[]).filter(m=>m.tipo==='salida');
+async function renderReportes(){
+  const ventas=await db.get('facturas',{order:'created_at.desc',limit:500});
+  const movimientos=await db.get('movimientos',{order:'created_at.desc',limit:500});
+  const totalVentas=ventas.reduce((a,f)=>a+(f.total||0),0);
+  const movIn=movimientos.filter(m=>m.tipo==='entrada');const movOut=movimientos.filter(m=>m.tipo==='salida');
   document.getElementById('reportStats').innerHTML=`
     <div class="sc green"><div class="sc-num">${fmtGs(totalVentas)}</div><div class="sc-label">Total facturado</div></div>
     <div class="sc yellow"><div class="sc-num">${ventas.length}</div><div class="sc-label">Facturas emitidas</div></div>
@@ -948,51 +1011,51 @@ function renderReportes(){
   const maxM=Math.max(...months.map(m=>byMonth[m]),1);
   document.getElementById('reportVentasMes').innerHTML=months.length?months.map(m=>`<div style="display:flex;align-items:center;gap.8rem;margin-bottom:.7rem"><span style="width:70px;font-size:.78rem;color:rgba(255,255,255,.5);font-family:'Barlow Condensed'">${m}</span><div style="flex:1;background:rgba(255,255,255,.06);height:18px;position:relative"><div style="width:${Math.round(byMonth[m]/maxM*100)}%;background:var(--y);height:100%"></div></div><span style="width:100px;text-align:right;font-size:.8rem;color:var(--y);font-family:'Bebas Neue'">${fmtGs(byMonth[m])}</span></div>`).join(''):emptyMsg('Sin ventas');
   // Top products
-  const prodSales={};ventas.forEach(f=>(f.items||[]).forEach(it=>{prodSales[it.desc]=(prodSales[it.desc]||0)+it.subtotal;}));
+  const prodSales={};ventas.forEach(f=>(Array.isArray(f.items)?f.items:[]).forEach(it=>{prodSales[it.desc]=(prodSales[it.desc]||0)+it.subtotal;}));
   const top=Object.entries(prodSales).sort((a,b)=>b[1]-a[1]).slice(0,6);
   const maxP=Math.max(...top.map(t=>t[1]),1);
   document.getElementById('reportTopProd').innerHTML=top.length?top.map(([n,v])=>`<div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.7rem"><span style="flex:1;font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${n}</span><div style="width:80px;background:rgba(255,255,255,.06);height:14px"><div style="width:${Math.round(v/maxP*100)}%;background:#4caf50;height:100%"></div></div><span style="width:90px;text-align:right;font-size:.8rem;color:#4caf50;font-family:'Bebas Neue'">${fmtGs(v)}</span></div>`).join(''):emptyMsg('Sin datos');
   // Entradas/salidas
   const last8in=[...movIn].reverse().slice(0,8);const last8out=[...movOut].reverse().slice(0,8);
-  document.getElementById('reportEntradas').innerHTML=last8in.length?last8in.map(m=>`<div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem"><span class="mov-in">↑ ${m.prod}</span><span style="color:rgba(255,255,255,.4)">${m.qty} u · ${fmtDate(m.fecha)}</span></div>`).join(''):emptyMsg('Sin entradas');
-  document.getElementById('reportSalidas').innerHTML=last8out.length?last8out.map(m=>`<div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem"><span class="mov-out">↓ ${m.prod}</span><span style="color:rgba(255,255,255,.4)">${m.qty} u · ${fmtDate(m.fecha)}</span></div>`).join(''):emptyMsg('Sin salidas');
+  document.getElementById('reportEntradas').innerHTML=last8in.length?last8in.map(m=>`<div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem"><span class="mov-in">↑ ${m.producto_nombre}</span><span style="color:rgba(255,255,255,.4)">${m.cantidad} u · ${fmtDate(m.fecha)}</span></div>`).join(''):emptyMsg('Sin entradas');
+  document.getElementById('reportSalidas').innerHTML=last8out.length?last8out.map(m=>`<div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem"><span class="mov-out">↓ ${m.producto_nombre}</span><span style="color:rgba(255,255,255,.4)">${m.cantidad} u · ${fmtDate(m.fecha)}</span></div>`).join(''):emptyMsg('Sin salidas');
 }
 
 // ═══════════════════════════════
 // DOCUMENT GENERATION
 // ═══════════════════════════════
-const cfg=()=>SYS.config;
 
-function buildPresHTML(pres){
+
+async function buildPresHTML(pres){
   const rowsHtml=(pres.items||[]).map(it=>`<tr><td>${it.desc||'—'}</td><td class="right">${it.qty}</td><td class="right">${it.precio?fmtGs(gs(it.precio)):'—'}</td><td class="right">${fmtGs(it.subtotal)}</td></tr>`).join('');
   return `<div class="doc-sheet">
     <div class="doc-header">
-      <div><div class="doc-brand">${cfg().empresa||'Power One Py'}</div><div class="doc-brand-sub">${cfg().dir||''} · ${cfg().tel||''} · ${cfg().email||''}</div><div class="doc-brand-sub">RUC: ${cfg().ruc||'—'}</div></div>
+      <div><div class="doc-brand">${(await getCfg()).empresa||'Power One Py'}</div><div class="doc-brand-sub">${(await getCfg()).dir||''} · ${(await getCfg()).wa||''} · ${(await getCfg()).email||''}</div><div class="doc-brand-sub">RUC: ${(await getCfg()).ruc||'—'}</div></div>
       <div><div class="doc-type-box">PRESUPUESTO</div><div class="doc-type-num">N° ${String(pres.num).padStart(7,'0')}</div></div>
     </div>
     <div class="doc-meta">
-      <div class="doc-meta-box"><div class="doc-meta-label">Cliente</div><div class="doc-meta-val"><strong>${pres.clienteNom||'Sin cliente'}</strong></div></div>
-      <div class="doc-meta-box"><div class="doc-meta-label">Fechas</div><div class="doc-meta-val">Emisión: ${fmtDate(pres.fecha)}<br>Válido hasta: ${fmtDate(pres.validHasta)}</div></div>
+      <div class="doc-meta-box"><div class="doc-meta-label">Cliente</div><div class="doc-meta-val"><strong>${pres.cliente_nombre||'Sin cliente'}</strong></div></div>
+      <div class="doc-meta-box"><div class="doc-meta-label">Fechas</div><div class="doc-meta-val">Emisión: ${fmtDate(pres.fecha)}<br>Válido hasta: ${fmtDate(pres.valido_hasta)}</div></div>
     </div>
     ${pres.notas?`<div class="doc-note">${pres.notas}</div>`:''}
     <table class="doc-table"><thead><tr><th>Descripción</th><th class="right">Cant.</th><th class="right">Precio Unit.</th><th class="right">Subtotal</th></tr></thead><tbody>${rowsHtml}</tbody></table>
     <div class="doc-totals"><div class="doc-totals-box"><div class="doc-total-row final"><span>TOTAL</span><span>${fmtGs(pres.total)}</span></div></div></div>
     <div class="doc-signs"><div class="doc-sign-box">Firma y sello empresa</div><div class="doc-sign-box">Aceptado por cliente</div></div>
-    <div class="doc-footer"><span>${cfg().empresa} · RUC ${cfg().ruc}</span><span>Válido hasta ${fmtDate(pres.validHasta)}</span></div>
+    <div class="doc-footer"><span>${cfg().empresa} · RUC ${cfg().ruc}</span><span>Válido hasta ${fmtDate(pres.valido_hasta)}</span></div>
   </div>`;
 }
 
-function buildFacHTML(fac){
+async function buildFacHTML(fac){
   const rowsHtml=(fac.items||[]).map(it=>`<tr><td>${it.desc||'—'}</td><td class="right">${it.qty}</td><td class="right">${it.precio?fmtGs(gs(it.precio)):'—'}</td><td class="right">${fmtGs(it.subtotal)}</td></tr>`).join('');
   const iva=Math.round(fac.total/11);
   return `<div class="doc-sheet">
     <div class="doc-header">
-      <div><div class="doc-brand">${cfg().empresa||'Power One Py'}</div><div class="doc-brand-sub">${cfg().dir||''} · Tel: ${cfg().tel||''}</div><div class="doc-brand-sub">RUC: ${cfg().ruc||'—'} · ${cfg().email||''}</div></div>
-      <div><div class="doc-type-box">FACTURA</div><div class="doc-type-num">${fac.num}</div></div>
+      <div><div class="doc-brand">${(await getCfg()).empresa||'Power One Py'}</div><div class="doc-brand-sub">${(await getCfg()).dir||''} · Tel: ${(await getCfg()).wa||''}</div><div class="doc-brand-sub">RUC: ${(await getCfg()).ruc||'—'} · ${(await getCfg()).email||''}</div></div>
+      <div><div class="doc-type-box">FACTURA</div><div class="doc-type-num">${fac.numero}</div></div>
     </div>
     <div class="doc-meta">
-      <div class="doc-meta-box"><div class="doc-meta-label">Cliente</div><div class="doc-meta-val"><strong>${fac.clienteNom||'Consumidor Final'}</strong><br>RUC/CI: ${fac.clienteRuc||'—'}</div></div>
-      <div class="doc-meta-box"><div class="doc-meta-label">Datos de factura</div><div class="doc-meta-val">Fecha: ${fmtDate(fac.fecha)}<br>Condición: ${fac.pago||'Contado'}</div></div>
+      <div class="doc-meta-box"><div class="doc-meta-label">Cliente</div><div class="doc-meta-val"><strong>${fac.cliente_nombre||'Consumidor Final'}</strong><br>RUC/CI: ${fac.cliente_ruc||'—'}</div></div>
+      <div class="doc-meta-box"><div class="doc-meta-label">Datos de factura</div><div class="doc-meta-val">Fecha: ${fmtDate(fac.fecha)}<br>Condición: ${fac.condicion_pago||'Contado'}</div></div>
     </div>
     ${fac.notas?`<div class="doc-note">${fac.notas}</div>`:''}
     <table class="doc-table"><thead><tr><th>Descripción</th><th class="right">Cant.</th><th class="right">Precio Unit.</th><th class="right">Total</th></tr></thead><tbody>${rowsHtml}</tbody></table>
@@ -1002,16 +1065,16 @@ function buildFacHTML(fac){
       <div class="doc-total-row final"><span>TOTAL</span><span>${fmtGs(fac.total)}</span></div>
     </div></div>
     <div class="doc-signs"><div class="doc-sign-box">Firma autorizada</div><div class="doc-sign-box">Recibido conforme</div></div>
-    <div class="doc-footer"><span>${cfg().empresa} · RUC ${cfg().ruc}</span><span>Factura N° ${fac.num} · ${fmtDate(fac.fecha)}</span></div>
+    <div class="doc-footer"><span>${cfg().empresa} · RUC ${cfg().ruc}</span><span>Factura N° ${fac.numero} · ${fmtDate(fac.fecha)}</span></div>
   </div>`;
 }
 
-function buildRecHTML(rec){
+async function buildRecHTML(rec){
   const letras=numToLetras(rec.monto);
   return `<div class="doc-sheet" style="min-height:auto">
     <div class="doc-header">
-      <div><div class="doc-brand">${cfg().empresa||'Power One Py'}</div><div class="doc-brand-sub">${cfg().dir||''} · Tel: ${cfg().tel||''}</div><div class="doc-brand-sub">RUC: ${cfg().ruc||'—'}</div></div>
-      <div><div class="doc-type-box">RECIBO</div><div class="doc-type-num">${rec.num}</div></div>
+      <div><div class="doc-brand">${(await getCfg()).empresa||'Power One Py'}</div><div class="doc-brand-sub">${(await getCfg()).dir||''} · Tel: ${(await getCfg()).wa||''}</div><div class="doc-brand-sub">RUC: ${(await getCfg()).ruc||'—'}</div></div>
+      <div><div class="doc-type-box">RECIBO</div><div class="doc-type-num">${rec.numero}</div></div>
     </div>
     <div style="margin:1.5rem 0;border:1px solid #ddd;padding:1.5rem">
       <table style="width:100%;border-collapse:collapse;font-size:.9rem">
@@ -1024,7 +1087,7 @@ function buildRecHTML(rec){
       </table>
     </div>
     <div class="doc-signs" style="margin-top:2rem"><div class="doc-sign-box">Firma quien recibe</div><div class="doc-sign-box">Firma quien entrega</div></div>
-    <div class="doc-footer" style="margin-top:1.5rem"><span>${cfg().empresa} · RUC ${cfg().ruc}</span><span>Recibo N° ${rec.num}</span></div>
+    <div class="doc-footer" style="margin-top:1.5rem"><span>${cfg().empresa} · RUC ${cfg().ruc}</span><span>Recibo N° ${rec.numero}</span></div>
   </div>`;
 }
 
@@ -1040,26 +1103,26 @@ function numToLetras(n){
 }
 
 // Preview from current form
-function previewDoc(type){
+async function previewDoc(type){
   let html='';
-  if(type==='presupuesto'){const total=presItems.reduce((a,it)=>a+(it.subtotal||0),0);const cid=document.getElementById('presClient').value;const cl=SYS.clientes.find(c=>c.id==cid);html=buildPresHTML({num:'PREV',fecha:new Date().toISOString().split('T')[0],clienteNom:cl?cl.nombre:'Sin cliente',items:presItems,total,notas:document.getElementById('presNotes').value,validHasta:document.getElementById('presValid').value});}
-  else if(type==='factura'){const total=facItems.reduce((a,it)=>a+(it.subtotal||0),0);const cid=document.getElementById('facClient').value;const cl=SYS.clientes.find(c=>c.id==cid);html=buildFacHTML({num:document.getElementById('facNum').value||'PREVIEW',fecha:document.getElementById('facDate').value,clienteNom:cl?cl.nombre:'Consumidor Final',clienteRuc:cl?cl.ruc:'—',items:facItems,total,notas:document.getElementById('facNotes').value,pago:document.getElementById('facPago').value});}
-  else if(type==='recibo'){const monto=gs(document.getElementById('recMonto').value);html=buildRecHTML({num:document.getElementById('recNum').value||'PREV',fecha:document.getElementById('recDate').value,nombre:document.getElementById('recName').value||'—',monto,concepto:document.getElementById('recConcepto').value,ref:document.getElementById('recRef').value,pago:document.getElementById('recPago').value});}
+  if(type==='presupuesto'){const total=presItems.reduce((a,it)=>a+(it.subtotal||0),0);const cid=document.getElementById('presClient').value;const cl=SYS.clientes.find(c=>c.id==cid);html=await buildPresHTML({num:'PREV',fecha:new Date().toISOString().split('T')[0],clienteNom:cl?cl.nombre:'Sin cliente',items:presItems,total,notas:document.getElementById('presNotes').value,validHasta:document.getElementById('presValid').value});}
+  else if(type==='factura'){const total=facItems.reduce((a,it)=>a+(it.subtotal||0),0);const cid=document.getElementById('facClient').value;const cl=SYS.clientes.find(c=>c.id==cid);html=await buildFacHTML({num:document.getElementById('facNum').value||'PREVIEW',fecha:document.getElementById('facDate').value,clienteNom:cl?cl.nombre:'Consumidor Final',clienteRuc:cl?cl.ruc:'—',items:facItems,total,notas:document.getElementById('facNotes').value,pago:document.getElementById('facPago').value});}
+  else if(type==='recibo'){const monto=gs(document.getElementById('recMonto').value);html=await buildRecHTML({num:document.getElementById('recNum').value||'PREV',fecha:document.getElementById('recDate').value,nombre:document.getElementById('recName').value||'—',monto,concepto:document.getElementById('recConcepto').value,ref:document.getElementById('recRef').value,pago:document.getElementById('recPago').value});}
   showPrint(html);
 }
 
 // Preview from saved data
-function previewDocFromData(type,id){
+async function previewDocFromData(type,id){
   let html='';
-  if(type==='presupuesto'){const p=SYS.presupuestos.find(x=>x.id==id);if(p)html=buildPresHTML(p);}
-  else if(type==='factura'){const f=SYS.facturas.find(x=>x.id==id);if(f)html=buildFacHTML(f);}
-  else if(type==='recibo'){const r=SYS.recibos.find(x=>x.id==id);if(r)html=buildRecHTML(r);}
+  if(type==='presupuesto'){const prs=await db.get('presupuestos',{eq:{id}});const p=prs[0];if(p)html=await buildPresHTML(p);}
+  else if(type==='factura'){const fcs=await db.get('facturas',{eq:{id}});const f=fcs[0];if(f)html=await buildFacHTML(f);}
+  else if(type==='recibo'){const rcs=await db.get('recibos',{eq:{id}});const r=rcs[0];if(r)html=await buildRecHTML(r);}
   if(html)showPrint(html);
 }
-function printDoc(type){previewDoc(type);}
-function printDocFromData(type,id){previewDocFromData(type,id);}
+async function printDoc(type){await previewDoc(type);}
+async function printDocFromData(type,id){await previewDocFromData(type,id);}
 
-function showPrint(html){
+async function showPrint(html){
   document.getElementById('printContent').innerHTML=html;
   document.getElementById('printOverlay').style.display='block';
   document.body.style.overflow='hidden';
@@ -1078,16 +1141,16 @@ async function exportPDF(){
     await doc.html(el,{callback:d=>{d.save('documento-poweronepy.pdf');showToast('✅ PDF descargado');},x:0,y:0,width:210,windowWidth:794});
   }catch(e){ window.print(); }
 }
-async function exportPresPDF(){
+async async function exportPresPDF(){
   const total=presItems.reduce((a,it)=>a+(it.subtotal||0),0);
   const cid=document.getElementById('presClient').value;const cl=SYS.clientes.find(c=>c.id==cid);
-  const html=buildPresHTML({num:'PREVIEW',fecha:new Date().toISOString().split('T')[0],clienteNom:cl?cl.nombre:'Sin cliente',items:presItems,total,notas:document.getElementById('presNotes').value,validHasta:document.getElementById('presValid').value});
+  const html=await buildPresHTML({num:'PREVIEW',fecha:new Date().toISOString().split('T')[0],clienteNom:cl?cl.nombre:'Sin cliente',items:presItems,total,notas:document.getElementById('presNotes').value,validHasta:document.getElementById('presValid').value});
   showPrint(html);
   setTimeout(()=>exportPDF(),300);
 }
-async function exportPresFromData(id){
-  const p=SYS.presupuestos.find(x=>x.id==id);
-  if(p){showPrint(buildPresHTML(p));setTimeout(()=>exportPDF(),300);}
+async async function exportPresFromData(id){
+  const prs2=await db.get('presupuestos',{eq:{id}});const p2=prs2[0];
+  if(p2){await showPrint(await buildPresHTML(p2));setTimeout(()=>exportPDF(),300);}
 }
 </script>
 </body>

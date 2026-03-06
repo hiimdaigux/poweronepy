@@ -2,16 +2,46 @@
 // POWER ONE PY — Shared utilities
 // ═══════════════════════════════════════════
 
-const DATA_URL = './productos.json';
+const SUPA_URL = 'https://oyhalszdnygmjztwmpni.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im95aGFsc3pkbnlnbWp6dHdtcG5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3NTY2MTQsImV4cCI6MjA4ODMzMjYxNH0.aBBwiKab2JHd-Btg3_ZmOQl2TD4CCBwK81g7qzOMlrI';
+const _SH = { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY };
 window._DB = null;
 
-// ─── DATA LOADER ───────────────────────────
+// ─── DATA LOADER — reads from Supabase ─────
 async function loadDB() {
   if (window._DB) return window._DB;
   try {
-    const r = await fetch(DATA_URL + '?t=' + Date.now());
-    window._DB = await r.json();
+    const [products, categories, streaming, services, cfgArr] = await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/products?active=eq.true&order=created_at.asc`, {headers:_SH}).then(r=>r.json()),
+      fetch(`${SUPA_URL}/rest/v1/categories?order=name.asc`, {headers:_SH}).then(r=>r.json()),
+      fetch(`${SUPA_URL}/rest/v1/streaming?active=eq.true&order=id.asc`, {headers:_SH}).then(r=>r.json()),
+      fetch(`${SUPA_URL}/rest/v1/services?order=id.asc`, {headers:_SH}).then(r=>r.json()),
+      fetch(`${SUPA_URL}/rest/v1/config?id=eq.1`, {headers:_SH}).then(r=>r.json()),
+    ]);
+    const cfg = cfgArr[0] || {};
+    // Normalize product fields to match existing templates
+    const prods = (products||[]).map(p => ({
+      ...p, desc: p.description || '', img: p.img || ''
+    }));
+    window._DB = {
+      products: prods,
+      categories: categories || [],
+      streaming: streaming || [],
+      services: services || [],
+      config: {
+        wa: cfg.wa || '595981570126',
+        city: cfg.city || 'Asunción, Paraguay',
+        email: cfg.email || 'info@poweronepy.com',
+        address: cfg.address || 'Asunción, Paraguay',
+        hours: cfg.hours || 'Lun-Sáb 08:00 - 18:00',
+        heroDesc: cfg.hero_desc || '',
+        empresa: cfg.empresa || 'Power One Py',
+        ruc: cfg.ruc || '',
+        timbrado: cfg.timbrado || '',
+      }
+    };
   } catch(e) {
+    console.warn('Supabase load failed, using defaults:', e.message);
     window._DB = defaultData();
   }
   return window._DB;
