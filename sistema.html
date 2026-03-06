@@ -541,10 +541,11 @@ const db = {
   async get(table, opts={}) {
     let url = `${SUPA_URL}/rest/v1/${table}?`;
     if(opts.select) url+=`select=${opts.select}&`;
-    if(opts.eq) Object.entries(opts.eq).forEach(([k,v])=>url+=`${k}=eq.${encodeURIComponent(v)}&`);
+    if(opts.eq) Object.entries(opts.eq).forEach(([k,v])=>url+=`${k}=eq.${v}&`);
     if(opts.order) url+=`order=${opts.order}&`;
     if(opts.limit) url+=`limit=${opts.limit}&`;
-    const r=await fetch(url,{headers:_H}); if(!r.ok)throw new Error(await r.text());
+    const r=await fetch(url,{headers:{..._H,'Prefer':'count=none'}}); 
+    if(!r.ok){ const err=await r.text(); throw new Error(err); }
     return await r.json();
   },
   async insert(table,data) {
@@ -605,13 +606,27 @@ window.addEventListener('load', async ()=>{
 const PAGES_MAP = { dashboard:'Dashboard', stock:'Stock / Inventario', movimientos:'Movimientos', clientes:'Clientes', proveedores:'Proveedores', presupuestos:'Presupuestos', facturas:'Facturas', recibos:'Recibos', reportes:'Reportería' };
 async function goPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  const pg = document.getElementById('page'+id.charAt(0).toUpperCase()+id.slice(1));
+  const pgId = 'page'+id.charAt(0).toUpperCase()+id.slice(1);
+  const pg = document.getElementById(pgId);
   if(pg) pg.classList.add('active');
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
-  document.querySelectorAll('.ni').forEach(n=>{ if(n.textContent.trim().toLowerCase().includes(id.toLowerCase().substring(0,5))) n.classList.add('active'); });
+  document.querySelectorAll('.ni').forEach(n=>{ if(n.getAttribute('onclick')===`goPage('${id}')`) n.classList.add('active'); });
   document.getElementById('pageTitle').textContent = (PAGES_MAP[id]||id).toUpperCase();
-  const renders = { dashboard:renderDashboard, stock:renderStock, movimientos:renderMovs, clientes:renderClients, proveedores:renderProvs, presupuestos:async()=>{await populateSelects();renderPresHistory();initPresItems();}, facturas:async()=>{await populateSelects();renderFacHistory();initFacItems();}, recibos:async()=>{await populateSelects();renderRecHistory();}, reportes:renderReportes };
-  if(renders[id]) await renders[id]();
+  const renders = {
+    dashboard: renderDashboard,
+    stock: renderStock,
+    movimientos: renderMovs,
+    clientes: renderClients,
+    proveedores: renderProvs,
+    presupuestos: async()=>{ await populateSelects(); await renderPresHistory(); initPresItems(); },
+    facturas: async()=>{ await populateSelects(); await renderFacHistory(); initFacItems(); },
+    recibos: async()=>{ await populateSelects(); await renderRecHistory(); },
+    reportes: renderReportes
+  };
+  if(renders[id]){
+    try{ await renders[id](); }
+    catch(e){ console.error('goPage render error ('+id+'):', e); showToast('⚠ Error cargando sección: '+e.message, true); }
+  }
 }
 
 // ═══════════════════════════════
@@ -648,6 +663,8 @@ async function populateSelects(){
 // DASHBOARD
 // ═══════════════════════════════
 async function renderDashboard(){
+  document.getElementById('dashMovs').innerHTML='<div style="text-align:center;padding:1rem;color:rgba(255,255,255,.3);font-size:.8rem">Cargando...</div>';
+  document.getElementById('dashLowStock').innerHTML='<div style="text-align:center;padding:1rem;color:rgba(255,255,255,.3);font-size:.8rem">Cargando...</div>';
   const [stockList,facturasAll,clientesList,movList]=await Promise.all([
     db.get('stock',{order:'nombre.asc'}),
     db.get('facturas',{select:'total',limit:500}),
@@ -682,6 +699,7 @@ async function renderDashboard(){
 // STOCK
 // ═══════════════════════════════
 async function renderStock(){
+  document.getElementById('stockBody').innerHTML='<tr><td colspan="9" style="text-align:center;padding:2rem;color:rgba(255,255,255,.3)"><span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.1);border-top-color:var(--y);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:.5rem"></span>Cargando...</td></tr>';
   populateSelects();
   const q=(document.getElementById('stockSearch').value||'').toLowerCase();
   const cf=(document.getElementById('stockCatFilter').value||'');
@@ -772,6 +790,7 @@ async function saveMov(){
 // CLIENTES
 // ═══════════════════════════════
 async function renderClients(){
+  document.getElementById('clientBody').innerHTML='<tr><td colspan="8" style="text-align:center;padding:2rem;color:rgba(255,255,255,.3)">Cargando...</td></tr>';
   const q=(document.getElementById('clientSearch').value||'').toLowerCase();
   let list = await db.get('clientes',{order:'nombre.asc'});
   if(q) list=list.filter(c=>(c.nombre+(c.ruc||'')+(c.email||'')).toLowerCase().includes(q));
@@ -815,6 +834,7 @@ async function deleteClient(id){if(!confirm('¿Eliminar cliente?'))return;await 
 // PROVEEDORES
 // ═══════════════════════════════
 async function renderProvs(){
+  document.getElementById('provBody').innerHTML='<tr><td colspan="8" style="text-align:center;padding:2rem;color:rgba(255,255,255,.3)">Cargando...</td></tr>';
   const q=(document.getElementById('provSearch').value||'').toLowerCase();
   let list = await db.get('proveedores',{order:'nombre.asc'});
   if(q)list=list.filter(p=>(p.nombre+(p.ruc||'')).toLowerCase().includes(q));
@@ -886,6 +906,7 @@ async function savePresupuesto(){
   }catch(e){showToast('⚠ '+e.message,true);}
 }
 async function renderPresHistory(){
+  document.getElementById('presHistory').innerHTML='<div style="padding:1.5rem;text-align:center;color:rgba(255,255,255,.3);font-size:.85rem">Cargando...</div>';
   const list=await db.get('presupuestos',{order:'created_at.desc',limit:50});
   document.getElementById('presHistory').innerHTML=list.length?list.map(p=>`<div style="padding:.9rem;border-bottom:1px solid rgba(255,255,255,.05)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">
@@ -939,6 +960,7 @@ async function saveFactura(){
   }catch(e){showToast('⚠ '+e.message,true);}
 }
 async function renderFacHistory(){
+  document.getElementById('facHistory').innerHTML='<div style="padding:1.5rem;text-align:center;color:rgba(255,255,255,.3);font-size:.85rem">Cargando...</div>';
   const list=await db.get('facturas',{order:'created_at.desc',limit:50});
   document.getElementById('facHistory').innerHTML=list.length?list.map(f=>`<div style="padding:.9rem;border-bottom:1px solid rgba(255,255,255,.05)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">
@@ -976,6 +998,7 @@ async function saveRecibo(){
   }catch(e){showToast('⚠ '+e.message,true);}
 }
 async function renderRecHistory(){
+  document.getElementById('recHistory').innerHTML='<div style="padding:1.5rem;text-align:center;color:rgba(255,255,255,.3);font-size:.85rem">Cargando...</div>';
   const list=await db.get('recibos',{order:'created_at.desc',limit:50});
   document.getElementById('recHistory').innerHTML=list.length?list.map(r=>`<div style="padding:.9rem;border-bottom:1px solid rgba(255,255,255,.05)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">
@@ -996,6 +1019,7 @@ async function deleteRec(id){if(!confirm('¿Eliminar recibo?'))return;await db.d
 // REPORTES
 // ═══════════════════════════════
 async function renderReportes(){
+  document.getElementById('reportStats').innerHTML='<div class="sc"><div class="sc-num">...</div><div class="sc-label">Cargando</div></div>'.repeat(4);
   const ventas=await db.get('facturas',{order:'created_at.desc',limit:500});
   const movimientos=await db.get('movimientos',{order:'created_at.desc',limit:500});
   const totalVentas=ventas.reduce((a,f)=>a+(f.total||0),0);
